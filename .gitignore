@@ -1,0 +1,13 @@
+.env
+/vendor/
+/node_modules/
+/logs/*.log
+*.zip
+*.rar
+.DS_Store
+Thumbs.db
+
+certs/
+*.p12
+*.pfx
+*.pem
