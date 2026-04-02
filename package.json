@@ -1,0 +1,23 @@
+{
+  "name": "fiskal-app",
+  "version": "1.0.0",
+  "description": "Web aplikacija za unos, pregled i fiskalizaciju računa.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukattl/fiskal-app26.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lukattl/fiskal-app26/issues"
+  },
+  "homepage": "https://github.com/lukattl/fiskal-app26#readme",
+  "dependencies": {
+    "bootstrap": "^5.3.8"
+  }
+}
