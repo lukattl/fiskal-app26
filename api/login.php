@@ -38,7 +38,7 @@ try {
     }
 
     $db = DB::getInstance();
-    $sql = "SELECT id, full_name, email, password from users where email = ?";
+    $sql = "SELECT * from users where email = ?";
     $query = $db->query($sql, [$email]);
 
     if ($query->getError() || !$query->getResults()) {
@@ -63,9 +63,7 @@ try {
 
     session_regenerate_id(true);
 
-    $_SESSION["user_id"] = $user->id;
-    $_SESSION["full_name"] = $user->full_name;
-    $_SESSION["email"] = $user->email;
+    Helper::storeAuthenticatedUser($user);
 
     echo json_encode([
         "success" => true,
