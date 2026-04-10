@@ -119,7 +119,7 @@ if (!empty($company['id'])) {
                                             data-bs-toggle="modal"
                                             data-bs-target="#editPriceListModal-<?php echo (int)($article['id'] ?? 0); ?>"
                                         >
-                                            Edit Article
+                                            Uredi
                                         </button>
                                     </td>
                                 </tr>
@@ -128,7 +128,7 @@ if (!empty($company['id'])) {
                     </table>
                 </div>
             <?php } else { ?>
-                <p class="text-muted mb-0">No price list articles found for this company.</p>
+                <p class="text-muted mb-0">Nema pronađenih artikala u cjeniku.</p>
             <?php } ?>
         </div>
     </main>

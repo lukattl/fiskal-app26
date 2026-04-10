@@ -63,30 +63,30 @@ if ($companyId > 0) {
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <div>
-                <h1 class="h4 mb-1">Dashboard</h1>
+                <h1 class="h4 mb-1">Ploča</h1>
                 <small class="text-muted">Welcome back, <?php echo $fullName; ?> from <?php echo $companyName; ?></small>
             </div>
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-primary btn-sm" href="invoices.php">All Invoices</a>
-                <a class="btn btn-primary btn-sm" href="new-invoice.php">New Invoice</a>
+                <a class="btn btn-outline-primary btn-sm" href="invoices.php">Svi računi</a>
+                <a class="btn btn-primary btn-sm" href="new-invoice.php">Novi račun</a>
             </div>
         </div>
 
         <div class="dashboard-grid mb-4">
             <div class="card p-3">
-                <h6 class="text-muted mb-2">Total Invoices</h6>
+                <h6 class="text-muted mb-2">Ukupno računa</h6>
                 <p class="display-6 mb-0"><?php echo (int)($stats['total_invoices'] ?? 0); ?></p>
             </div>
             <div class="card p-3">
-                <h6 class="text-muted mb-2">Fiscalized</h6>
+                <h6 class="text-muted mb-2">Fiskalizirani</h6>
                 <p class="display-6 mb-0"><?php echo (int)($stats['fiscalized_invoices'] ?? 0); ?></p>
             </div>
             <div class="card p-3">
-                <h6 class="text-muted mb-2">Not Fiscalized</h6>
+                <h6 class="text-muted mb-2">Nefiskalizirani</h6>
                 <p class="display-6 mb-0"><?php echo (int)($stats['not_fiscalized_invoices'] ?? 0); ?></p>
             </div>
             <div class="card p-3">
-                <h6 class="text-muted mb-2">Revenue</h6>
+                <h6 class="text-muted mb-2">Prihod</h6>
                 <p class="display-6 mb-0"><?php echo number_format((float)($stats['revenue'] ?? 0), 2, ',', '.'); ?> EUR</p>
             </div>
         </div>
@@ -95,18 +95,18 @@ if ($companyId > 0) {
             <div class="col-lg-8 mb-3">
                 <div class="card p-3 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Recent Invoices</h5>
-                        <a class="btn btn-outline-secondary btn-sm" href="invoices.php">Open list</a>
+                        <h5 class="mb-0">Nedavni računi</h5>
+                        <a class="btn btn-outline-secondary btn-sm" href="invoices.php">Otvori </a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Invoice</th>
-                                    <th>Date</th>
-                                    <th>Customer</th>
+                                    <th>Računi  </th>
+                                    <th>Datum</th>
+                                    <th>Kupac</th>
                                     <th>Status</th>
-                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Iznos</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -131,9 +131,9 @@ if ($companyId > 0) {
                                             <td><?php echo htmlspecialchars((string)($invoice['customer_name'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
                                             <td>
                                                 <?php if ($isFiscalized) { ?>
-                                                    <span class="badge bg-success">Fiscalized</span>
+                                                    <span class="badge bg-success">Fiskalizirani</span>
                                                 <?php } else { ?>
-                                                    <span class="badge bg-danger">Not fiscalized</span>
+                                                    <span class="badge bg-danger">Nefiskalizirani</span>
                                                 <?php } ?>
                                             </td>
                                             <td class="text-end"><?php echo number_format((float)($invoice['total_price'] ?? 0), 2, ',', '.'); ?> EUR</td>
@@ -141,7 +141,7 @@ if ($companyId > 0) {
                                     <?php } ?>
                                 <?php } else { ?>
                                     <tr>
-                                        <td colspan="5" class="text-muted text-center py-4">No invoices found for this company yet.</td>
+                                        <td colspan="5" class="text-muted text-center py-4">Nema računa za tvrtku još!</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -151,18 +151,16 @@ if ($companyId > 0) {
             </div>
             <div class="col-lg-4 mb-3">
                 <div class="card p-3 h-100">
-                    <h5>Quick Actions</h5>
                     <div class="d-grid gap-2 mb-4">
-                        <a class="btn btn-primary" href="new-invoice.php">New Invoice</a>
-                        <a class="btn btn-outline-primary" href="customers.php">Customers</a>
-                        <a class="btn btn-outline-secondary" href="settings.php">Settings</a>
+                        <a class="btn btn-primary" href="new-invoice.php">Novi račun</a>
+                        <a class="btn btn-outline-primary" href="customers.php">Kupci</a>
+                        <a class="btn btn-outline-secondary" href="settings.php">Postavke</a>
                     </div>
-                    <h6 class="text-muted">At a Glance</h6>
                     <div class="small text-body-secondary">
-                        <div class="mb-2"><strong>Company:</strong> <?php echo $companyName; ?></div>
-                        <div class="mb-2"><strong>Customers:</strong> <?php echo (int)($stats['customers'] ?? 0); ?></div>
-                        <div class="mb-2"><strong>Recent invoices shown:</strong> <?php echo count($recentInvoices); ?></div>
-                        <div><strong>User:</strong> <?php echo $fullName; ?></div>
+                        <div class="mb-2"><strong>Tvrtka:</strong> <?php echo $companyName; ?></div>
+                        <div class="mb-2"><strong>Kupci:</strong> <?php echo (int)($stats['customers'] ?? 0); ?></div>
+                        <div class="mb-2"><strong>Nedavni računi:</strong> <?php echo count($recentInvoices); ?></div>
+                        <div><strong>Korisnik:</strong> <?php echo $fullName; ?></div>
                     </div>
                 </div>
             </div>

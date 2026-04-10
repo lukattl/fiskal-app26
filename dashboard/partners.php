@@ -18,17 +18,17 @@ if (!$partnersQuery->getError() && $partnersQuery->getResults()) {
 
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h4 mb-0">Partners</h1>
+            <h1 class="h4 mb-0">Kupci</h1>
             <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Back to Dashboard</a>
         </div>
 
         <div class="card p-4">
             <div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
-                <h2 class="h5 mb-0">Partner List</h2>
+                <h2 class="h5 mb-0">Lista kupaca</h2>
                 <input
                     class="form-control"
                     type="search"
-                    placeholder="Search partners..."
+                    placeholder="Pretraži kupce..."
                     data-search-input
                     data-search-target="#partnersTableBody"
                     style="max-width: 320px;"
@@ -40,13 +40,13 @@ if (!$partnersQuery->getError() && $partnersQuery->getResults()) {
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>Full Name</th>
-                                <th>Address</th>
-                                <th>City</th>
-                                <th>Country</th>
+                                <th>Puno ime</th>
+                                <th>Adresa</th>
+                                <th>Grad</th>
+                                <th>Država</th>
                                 <th>OIB</th>
                                 <th>Email</th>
-                                <th class="text-end">Action</th>
+                                <th class="text-end">Operacije</th>
                             </tr>
                         </thead>
                         <tbody id="partnersTableBody">
@@ -65,7 +65,7 @@ if (!$partnersQuery->getError() && $partnersQuery->getResults()) {
                                             data-bs-toggle="modal"
                                             data-bs-target="#editPartnerModal-<?php echo (int)($partner['id'] ?? 0); ?>"
                                         >
-                                            Edit Partner
+                                            Uredi
                                         </button>
                                     </td>
                                 </tr>
@@ -74,7 +74,7 @@ if (!$partnersQuery->getError() && $partnersQuery->getResults()) {
                     </table>
                 </div>
             <?php } else { ?>
-                <p class="text-muted mb-0">No partners found.</p>
+                <p class="text-muted mb-0">Nema pronađenih kupaca.</p>
             <?php } ?>
         </div>
     </main>

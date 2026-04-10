@@ -55,14 +55,14 @@ function formatProfileDate($value) {
 
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h4 mb-0">My Profile</h1>
-            <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Back to Dashboard</a>
+            <h1 class="h4 mb-0">Moj profil</h1>
+            <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Natrag na ploču</a>
         </div>
 
         <div class="card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h5 mb-0">User Data</h2>
-                <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit User</button>
+                <h2 class="h5 mb-0">Podaci o korisniku</h2>
+                <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editUserModal">Uredi korisnika</button>
             </div>
             <dl class="row mb-0">
                 <?php foreach ($userFields as $field => $value) { ?>
@@ -74,8 +74,8 @@ function formatProfileDate($value) {
 
         <div class="card p-4 mt-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h5 mb-0">Company Data</h2>
-                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editCompanyModal">Edit Company</button>
+                <h2 class="h5 mb-0">Podaci o tvrtci</h2>
+                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editCompanyModal">Uredi tvrtku</button>
             </div>
             <?php if (!empty($companyFields)) { ?>
                 <dl class="row mb-0">
@@ -85,7 +85,7 @@ function formatProfileDate($value) {
                     <?php } ?>
                 </dl>
             <?php } else { ?>
-                <p class="text-muted mb-0">No company data found for this user.</p>
+                <p class="text-muted mb-0">Nisu pronađeni podaci o tvrtci za ovog korisnika.</p>
             <?php } ?>
         </div>
     </main>

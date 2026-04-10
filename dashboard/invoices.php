@@ -102,10 +102,10 @@ function invoiceActionIcon($type)
 
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h4 mb-0">Invoices</h1>
+            <h1 class="h4 mb-0">Računi</h1>
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Back to Dashboard</a>
-                <a class="btn btn-outline-primary btn-sm" href="new-invoice.php">New Invoice</a>
+                <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Natrag</a>
+                <a class="btn btn-outline-primary btn-sm" href="new-invoice.php">Novi račun</a>
             </div>
         </div>
 
@@ -115,15 +115,15 @@ function invoiceActionIcon($type)
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>Invoice</th>
-                                <th>Invoice Date</th>
-                                <th>Due Date</th>
-                                <th>Customer</th>
-                                <th>Netto Price</th>
-                                <th>Final Price</th>
+                                <th>Računi</th>
+                                <th>Datum računa</th>
+                                <th>Rok plaćanja</th>
+                                <th>Kupac</th>
+                                <th>Netto cijena</th>
+                                <th>Ukupna cijena</th>
                                 <th>Fiskalizacija</th>
-                                <th>Remark</th>
-                                <th class="text-end">Actions</th>
+                                <th>Napomena</th>
+                                <th class="text-end">Operacije</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,9 +156,9 @@ function invoiceActionIcon($type)
                                     <td><?php echo htmlspecialchars(formatInvoiceMoney($invoice['total_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td>
                                         <?php if ($isFiskalized) { ?>
-                                            <span class="badge bg-success">Fiskalized</span>
+                                            <span class="badge bg-success">Fiskalizirani</span>
                                         <?php } else { ?>
-                                            <span class="badge bg-danger">Not fiskalized</span>
+                                            <span class="badge bg-danger">Nefiskalizirani</span>
                                         <?php } ?>
                                     </td>
                                     <td><?php echo htmlspecialchars((string)($invoice['remark'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
@@ -168,7 +168,7 @@ function invoiceActionIcon($type)
                                                 <?php echo invoiceActionIcon('preview'); ?>
                                             </button>
                                             <?php if (!$isFiskalized) { ?>
-                                                <button class="btn btn-danger btn-sm" type="button" data-fiscalize-invoice data-invoice-id="<?php echo (int)($invoice['id'] ?? 0); ?>" data-endpoint="../api/generate-fiscal-xml.php">Fiscalize</button>
+                                                <button class="btn btn-danger btn-sm" type="button" data-fiscalize-invoice data-invoice-id="<?php echo (int)($invoice['id'] ?? 0); ?>" data-endpoint="../api/generate-fiscal-xml.php">Fiskaliziraj</button>
                                             <?php } ?>
                                             <a class="btn btn-outline-danger btn-sm" href="new-invoice.php?storno_invoice_id=<?php echo (int)($invoice['id'] ?? 0); ?>" title="Storno" aria-label="Storno">
                                                 <?php echo invoiceActionIcon('storno'); ?>
@@ -232,33 +232,33 @@ function invoiceActionIcon($type)
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
                                                     </dl>
                                                 <?php } else { ?>
-                                                    <p class="text-muted mb-0">Customer details are not available.</p>
+                                                    <p class="text-muted mb-0">Ne postoje podaci o kupcu.</p>
                                                 <?php } ?>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="card p-3 h-100">
-                                                <h3 class="h6 mb-3">Invoice Details</h3>
+                                                <h3 class="h6 mb-3">Detalji računa</h3>
                                                 <dl class="row mb-0">
-                                                    <dt class="col-sm-5">Invoice Date</dt>
+                                                    <dt class="col-sm-5">Datum računa</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars($invoiceDate, ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Due Date</dt>
+                                                    <dt class="col-sm-5">Rok plaćanja</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars($dueDate, ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Payment</dt>
+                                                    <dt class="col-sm-5">Plaćanje</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars((string)($invoice['payment'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Netto Price</dt>
+                                                    <dt class="col-sm-5">Osnovica</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['netto_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">VAT Amount</dt>
+                                                    <dt class="col-sm-5">Iznos PDV-a</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['vat_amount'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Final Price</dt>
+                                                    <dt class="col-sm-5">Konačna cijena</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['total_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Fiscalization</dt>
+                                                    <dt class="col-sm-5">Fiskalizacija</dt>
                                                     <dd class="col-sm-7"><?php echo !empty($invoice['jir']) && !empty($invoice['fiskaled_at']) ? 'Yes' : 'No'; ?></dd>
                                                     <dt class="col-sm-5">JIR</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars((string)($invoice['jir'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Fiskaled At</dt>
+                                                    <dt class="col-sm-5">Vrijeme fiskalizacije</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceDateTimeValue($invoice['fiskaled_at'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Remark</dt>
+                                                    <dt class="col-sm-5">Napomena</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars((string)($invoice['remark'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
                                                 </dl>
                                             </div>
@@ -272,14 +272,14 @@ function invoiceActionIcon($type)
                                                 <table class="table table-sm align-middle mb-0">
                                                     <thead>
                                                         <tr>
-                                                            <th>Label</th>
-                                                            <th>Amount</th>
-                                                            <th>Retail Price</th>
-                                                            <th>VAT</th>
-                                                            <th>Unit</th>
-                                                            <th>Discount</th>
-                                                            <th>Tip</th>
-                                                            <th>Final Price</th>
+                                                            <th>Oznaka</th>
+                                                            <th>Količina</th>
+                                                            <th>Osnovica</th>
+                                                            <th>PDV</th>
+                                                            <th>Jedinica</th>
+                                                            <th>Popust</th>
+                                                            <th>Napojnica</th>
+                                                            <th>Konačna cijena</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -299,7 +299,7 @@ function invoiceActionIcon($type)
                                                 </table>
                                             </div>
                                         <?php } else { ?>
-                                            <p class="text-muted mb-0">No article lines found for this invoice.</p>
+                                            <p class="text-muted mb-0">Nisu pronađeni artikli za ovaj račun.</p>
                                         <?php } ?>
                                     </div>
                                 </div>
@@ -308,7 +308,7 @@ function invoiceActionIcon($type)
                     </div>
                 <?php } ?>
             <?php } else { ?>
-                <p class="text-muted mb-0">No invoices created yet.</p>
+                <p class="text-muted mb-0">Nisu pronađeni računi.</p>
             <?php } ?>
         </div>
     </main>

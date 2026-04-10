@@ -169,12 +169,12 @@ require '../includes/header.php';
             <div class="row g-3">
                 <div class="col-xl-6">
                     <section class="invoice-box h-100">
-                        <div class="invoice-box__head"><span>Customer - header text</span><button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Edit</button></div>
+                        <div class="invoice-box__head"><span>Kupac</span><button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Edit</button></div>
                         <div class="invoice-box__body">
                             <div class="invoice-customer-grid">
                                 <div class="invoice-field invoice-field--plain">
-                                    <label for="invoice-customer-full-name">Full Name</label>
-                                    <input class="form-control" type="text" id="invoice-customer-full-name" name="customer_full_name" list="invoice-customer-names" autocomplete="off" placeholder="Type or select customer..." value="<?php echo htmlspecialchars((string)($prefillCustomer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
+                                    <label for="invoice-customer-full-name">Puno ime</label>
+                                    <input class="form-control" type="text" id="invoice-customer-full-name" name="customer_full_name" list="invoice-customer-names" autocomplete="off" placeholder="Upišite ili odaberite kupca..." value="<?php echo htmlspecialchars((string)($prefillCustomer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                                     <datalist id="invoice-customer-names"><?php foreach ($customers as $customer) { ?><option value="<?php echo htmlspecialchars((string)($customer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></option><?php } ?></datalist>
                                 </div>
                                 <div class="invoice-field invoice-field--plain">
@@ -182,14 +182,14 @@ require '../includes/header.php';
                                     <input class="form-control" type="text" id="invoice-customer-oib" name="customer_oib" list="invoice-customer-oibs" autocomplete="off" inputmode="numeric" maxlength="11" pattern="\d{11}" value="<?php echo htmlspecialchars((string)($prefillCustomer['oib'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                     <datalist id="invoice-customer-oibs"><?php foreach ($customers as $customer) { ?><option value="<?php echo htmlspecialchars((string)($customer['oib'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></option><?php } ?></datalist>
                                 </div>
-                                <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" role="switch" id="invoice-customer-legal" name="customer_legal" value="1" <?php echo !empty($prefillCustomer['legal']) ? 'checked' : ''; ?>><label class="form-check-label" for="invoice-customer-legal">Legal Entity</label></div>
+                                <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" role="switch" id="invoice-customer-legal" name="customer_legal" value="1" <?php echo !empty($prefillCustomer['legal']) ? 'checked' : ''; ?>><label class="form-check-label" for="invoice-customer-legal">Pravna osoba</label></div>
                             </div>
                            
                             <div class="collapse mt-3" id="invoiceCustomerDetails">
                                 <div class="invoice-details-grid">
-                                    <div class="invoice-field"><label for="invoice-customer-address">Address</label><input class="form-control" type="text" id="invoice-customer-address" name="customer_address" value="<?php echo htmlspecialchars((string)($prefillCustomer['address'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                    <div class="invoice-field"><label for="invoice-customer-city">City</label><input class="form-control" type="text" id="invoice-customer-city" name="customer_city" value="<?php echo htmlspecialchars((string)($prefillCustomer['city'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                    <div class="invoice-field"><label for="invoice-customer-country">Country</label><input class="form-control" type="text" id="invoice-customer-country" name="customer_country" value="<?php echo htmlspecialchars((string)($prefillCustomer['country'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                    <div class="invoice-field"><label for="invoice-customer-address">Adresa</label><input class="form-control" type="text" id="invoice-customer-address" name="customer_address" value="<?php echo htmlspecialchars((string)($prefillCustomer['address'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                    <div class="invoice-field"><label for="invoice-customer-city">Grad</label><input class="form-control" type="text" id="invoice-customer-city" name="customer_city" value="<?php echo htmlspecialchars((string)($prefillCustomer['city'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                    <div class="invoice-field"><label for="invoice-customer-country">Država</label><input class="form-control" type="text" id="invoice-customer-country" name="customer_country" value="<?php echo htmlspecialchars((string)($prefillCustomer['country'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
                                     <div class="invoice-field"><label for="invoice-customer-email">Email</label><input class="form-control" type="email" id="invoice-customer-email" name="customer_email" value="<?php echo htmlspecialchars((string)($prefillCustomer['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
                                 </div>
                             </div>
@@ -198,19 +198,19 @@ require '../includes/header.php';
                 </div>
                 <div class="col-xl-6">
                     <section class="invoice-box h-100">
-                        <div class="invoice-box__head"><span>Zagreb, dated <span data-invoice-date-heading><?php echo htmlspecialchars(date('d.m.Y', strtotime($defaultInvoiceDate)), ENT_QUOTES, 'UTF-8'); ?></span></span><span><span data-invoice-customer-type-code>F2</span> R1</span></div>
+                        <div class="invoice-box__head"><span>Zagreb, datum <span data-invoice-date-heading><?php echo htmlspecialchars(date('d.m.Y', strtotime($defaultInvoiceDate)), ENT_QUOTES, 'UTF-8'); ?></span></span><span><span data-invoice-customer-type-code>F2</span> R1</span></div>
                         <div class="invoice-box__body">
                             <div class="invoice-meta-grid">
-                                <div class="invoice-field"><label for="invoice-number-preview">Invoice Number</label><input class="form-control" type="text" id="invoice-number-preview" value="<?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?>" readonly></div>
-                                <div class="invoice-field"><label for="invoice-payment">Payment</label><select class="form-select" id="invoice-payment" name="payment" required><?php foreach ($invoicePayments as $paymentValue => $paymentLabel) { ?><option value="<?php echo htmlspecialchars($paymentValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedInvoicePayment === $paymentValue ? 'selected' : ''; ?>><?php echo htmlspecialchars($paymentLabel, ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
-                                <div class="invoice-field"><label for="invoice-date">Invoice Date</label><input class="form-control" type="date" id="invoice-date" name="invoice_date" value="<?php echo htmlspecialchars($prefillInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                                <div class="invoice-field"><label for="invoice-due-date">Due Date</label><input class="form-control" type="date" id="invoice-due-date" name="due_date" value="<?php echo htmlspecialchars($prefillDueDate, ENT_QUOTES, 'UTF-8'); ?>" required></div>
+                                <div class="invoice-field"><label for="invoice-number-preview">Broj računa</label><input class="form-control" type="text" id="invoice-number-preview" value="<?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?>" readonly></div>
+                                <div class="invoice-field"><label for="invoice-payment">Plaćanje</label><select class="form-select" id="invoice-payment" name="payment" required><?php foreach ($invoicePayments as $paymentValue => $paymentLabel) { ?><option value="<?php echo htmlspecialchars($paymentValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedInvoicePayment === $paymentValue ? 'selected' : ''; ?>><?php echo htmlspecialchars($paymentLabel, ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
+                                <div class="invoice-field"><label for="invoice-date">Datum računa</label><input class="form-control" type="date" id="invoice-date" name="invoice_date" value="<?php echo htmlspecialchars($prefillInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>" required></div>
+                                <div class="invoice-field"><label for="invoice-due-date">Datum dospijeća</label><input class="form-control" type="date" id="invoice-due-date" name="due_date" value="<?php echo htmlspecialchars($prefillDueDate, ENT_QUOTES, 'UTF-8'); ?>" required></div>
                             </div>
                             <div class="mt-3 text-body-secondary">
-                                <div><strong>Due date:</strong> <span data-invoice-due-date-label><?php echo htmlspecialchars(date('d.m.Y', strtotime($prefillDueDate)), ENT_QUOTES, 'UTF-8'); ?></span></div>
+                                <div><strong>Dospijeće:</strong> <span data-invoice-due-date-label><?php echo htmlspecialchars(date('d.m.Y', strtotime($prefillDueDate)), ENT_QUOTES, 'UTF-8'); ?></span></div>
                                 <div><strong>Business unit:</strong> <?php echo htmlspecialchars((string)($bunit['name'] ?? $bunit['label'] ?? 'Default unit'), ENT_QUOTES, 'UTF-8'); ?></div>
-                                <div><strong>Invoice type:</strong> Retail invoice - prices without VAT</div>
-                                <div><strong>Language:</strong> HR</div>
+                                <div><strong>Invoice type:</strong> Maloprodajni račun - cijene bez PDV-a</div>
+                                <div><strong>Jezik:</strong> HR</div>
                             </div>
                         </div>
                     </section>
@@ -222,15 +222,15 @@ require '../includes/header.php';
                     <?php if (!empty($priceListRows)) { ?>
                         <div class="invoice-search">
                             <div class="invoice-field position-relative">
-                                <label for="invoice-article-search">Search Article</label>
-                                <input class="form-control" type="text" id="invoice-article-search" autocomplete="off" placeholder="Search article by name">
+                                <label for="invoice-article-search">Pretraži artikal</label>
+                                <input class="form-control" type="text" id="invoice-article-search" autocomplete="off" placeholder="Pretraži artikal po nazivu">
                                 <div class="list-group position-absolute start-0 end-0 mt-1 shadow-sm d-none" id="invoice-article-suggestions" style="z-index:1055;max-height:220px;overflow-y:auto;"></div>
                             </div>
-                            <button class="btn btn-primary" type="button" id="invoiceSecondaryAddArticleButton">Add selected article</button>
+                            <button class="btn btn-primary" type="button" id="invoiceSecondaryAddArticleButton">Dodaj artikal</button>
                         </div>
                         <div class="invoice-table-wrap table-responsive">
                             <table class="table table-sm align-middle invoice-table">
-                                <thead><tr><th>#</th><th>Article / Service</th><th>Qty</th><th>Unit</th><th>Price w/o VAT</th><th>Discount %</th><th>VAT %</th><th>Tip</th><th>Total</th><th class="text-end"></th></tr></thead>
+                                <thead><tr><th>#</th><th>Artikl / Usluga</th><th>Kol</th><th>Jedinica</th><th>Cijena bez PDV-a</th><th>Popust %</th><th>PDV %</th><th>Napojnica</th><th>Ukupno</th><th class="text-end"></th></tr></thead>
                                 <tbody id="invoiceArticlesTableBody"></tbody>
                             </table>
                         </div>
@@ -248,17 +248,17 @@ require '../includes/header.php';
                                 <td class="text-end"><button class="btn btn-outline-danger btn-sm" type="button" data-remove-article>X</button></td>
                             </tr>
                         </template>
-                    <?php } else { ?><p class="text-muted mb-0">No articles found in the company price list.</p><?php } ?>
+                    <?php } else { ?><p class="text-muted mb-0">Nema pronađenih artikla</p><?php } ?>
                     <div class="invoice-actions mt-3">
-                        <div class="invoice-control">Articles: <strong data-invoice-item-count>0</strong></div>
+                        <div class="invoice-control">Artikli: <strong data-invoice-item-count>0</strong></div>
                         <div class="invoice-summary">
-                            <div class="invoice-summary__row"><span>Total without VAT</span><span data-invoice-total-base>0.00 EUR</span></div>
-                            <div class="invoice-summary__row"><span>VAT amount</span><span data-invoice-total-vat>0.00 EUR</span></div>
-                            <div class="invoice-summary__row invoice-summary__row--strong"><span>Amount Due</span><span data-invoice-grand-total>0.00 EUR</span></div>
+                            <div class="invoice-summary__row"><span>Ukupno bez PDV-a</span><span data-invoice-total-base>0.00 EUR</span></div>
+                            <div class="invoice-summary__row"><span>PDV iznos</span><span data-invoice-total-vat>0.00 EUR</span></div>
+                            <div class="invoice-summary__row invoice-summary__row--strong"><span>Iznos </span><span data-invoice-grand-total>0.00 EUR</span></div>
                         </div>
                     </div>
                     <div class="mt-3">
-                        <div class="invoice-field"><label for="invoice-ending-note">Ending text on document</label><textarea class="form-control invoice-note" id="invoice-ending-note" rows="4" placeholder="Optional footer text for the invoice..."><?php echo htmlspecialchars($prefillRemark, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
+                        <div class="invoice-field"><label for="invoice-ending-note">Završni tekst</label><textarea class="form-control invoice-note" id="invoice-ending-note" rows="4" placeholder="Optional footer text for the invoice..."><?php echo htmlspecialchars($prefillRemark, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
                     </div>
                 </div>
             </section>

@@ -138,21 +138,8 @@ class Fiskalizacija {
         $SignedInfoNode = $XMLRequestDOMDoc->getElementsByTagName('SignedInfo')->item(0);
 
         $X509Issuer = $this->publicCertificateData['issuer'];
-//        $X509IssuerName = sprintf('OU=%s,O=%s,C=%s', $X509Issuer['OU'], $X509Issuer['O'], $X509Issuer['C']);
         $X509IssuerName = sprintf('O=%s,C=%s', $X509Issuer['O'], $X509Issuer['C']);
-
-        #$X509IssuerSerial = $this->publicCertificateData['serialNumber'];
         $X509IssuerSerial = $this->bchexdec($this->publicCertificateData['serialNumberHex']);
-        /* if (!is_numeric($X509IssuerSerial)) {
-            $X509IssuerSerial = dechex($this->publicCertificateData['serialNumberHex']);
-            if ($X509IssuerSerial == '263f') {
-                $X509IssuerSerial = '201469987106948237713134080206038892544';
-            } else if($X509IssuerSerial == '16cec'){
-                $X509IssuerSerial = '195739438767444742260002847259399278760';
-            } else {
-                
-            }
-        } */
 
         $publicCertificatePureString = str_replace('-----BEGIN CERTIFICATE-----', '', $this->certificate['cert']);
         $publicCertificatePureString = str_replace('-----END CERTIFICATE-----', '', $publicCertificatePureString);
