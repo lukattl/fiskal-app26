@@ -17,6 +17,8 @@ class Bill {
     public $noteOfRedelivary = false;    
     public $idKupca;
     public $oznakaIdKupca;
+    public $noteOfParagonBill = null;
+    public $specificPurpose = null;
     public $operationType = 'create';
 
     public function setOib($oib) {

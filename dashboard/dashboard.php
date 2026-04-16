@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require '../core/init.php';
 
 $user = Helper::requireAuth();
@@ -79,55 +79,197 @@ if ($companyId > 0) {
 ?>
 <?php require '../includes/header.php'; ?>
 
-    <main class="container my-4">
+    <main class="container pt-0 pb-4">
+        <style>
+            .dashboard-hero {
+                position: relative;
+                overflow: hidden;
+                border-radius: 1.25rem;
+                border: 1px solid rgba(13, 110, 253, 0.08);
+                background:
+                    radial-gradient(circle at top right, rgba(13, 110, 253, 0.14), transparent 18rem),
+                    linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+                box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+            }
+
+            .dashboard-hero__eyebrow {
+                display: inline-flex;
+                align-items: center;
+                gap: .4rem;
+                font-size: .72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .12em;
+                color: #5c7aa6;
+                margin-bottom: .75rem;
+            }
+
+            .dashboard-hero__actions .btn {
+                min-width: 9rem;
+            }
+
+            .dashboard-stat {
+                position: relative;
+                overflow: hidden;
+                background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,250,255,0.98) 100%);
+            }
+
+            .dashboard-stat__icon {
+                width: 3rem;
+                height: 3rem;
+                border-radius: 1rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 800;
+                font-size: 1rem;
+                color: #0d6efd;
+                background: rgba(13, 110, 253, 0.1);
+                box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.08);
+            }
+
+            .dashboard-stat__value {
+                font-size: 2rem;
+                font-weight: 800;
+                line-height: 1;
+                color: #17324d;
+            }
+
+            .dashboard-stat__hint {
+                font-size: .9rem;
+                color: #6b7d92;
+            }
+
+            .dashboard-panel__title {
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+            }
+
+            .dashboard-panel__dot {
+                width: .75rem;
+                height: .75rem;
+                border-radius: 999px;
+                background: linear-gradient(135deg, #0d6efd 0%, #84b6ff 100%);
+                box-shadow: 0 0 0 .25rem rgba(13, 110, 253, 0.12);
+            }
+
+            .dashboard-table thead th {
+                font-size: .78rem;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                color: #70839a;
+                border-bottom-color: #dbe4f0;
+            }
+
+            .dashboard-customer-item {
+                border: 1px solid #edf2f8;
+                border-radius: .95rem;
+                background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+                padding: .85rem .95rem;
+            }
+
+            .dashboard-customer-item + .dashboard-customer-item {
+                margin-top: .75rem;
+            }
+
+            .dashboard-customer-progress {
+                height: .45rem;
+                border-radius: 999px;
+                background: #eef3f9;
+                overflow: hidden;
+            }
+
+            .dashboard-customer-progress__bar {
+                height: 100%;
+                border-radius: 999px;
+                background: linear-gradient(90deg, #0d6efd 0%, #7fb2ff 100%);
+            }
+        </style>
+
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <div>
-                <h1 class="h4 mb-1">Ploča</h1>
-            </div>
-            <div class="d-flex gap-2">
-                <a class="btn btn-primary btn-sm" href="new-invoice.php">Novi račun</a>
+            <div class="dashboard-hero w-100 p-4 p-lg-5">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-8">
+                        <div class="dashboard-hero__eyebrow">Pregled poslovanja</div>
+                        <h1 class="display-6 fw-bold mb-2">Dobrodošao natrag, <?php echo htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8'); ?></h1>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="dashboard-hero__actions d-flex flex-wrap justify-content-lg-end gap-2">
+                            <a class="btn btn-primary" href="new-invoice.php">Novi račun</a>
+                            <a class="btn btn-outline-primary" href="invoices.php">Svi računi</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card p-3 h-100">
-                    <h6 class="text-muted mb-2">Ukupno računa</h6>
-                    <p class="display-6 mb-0"><?php echo (int)($stats['total_invoices'] ?? 0); ?></p>
+                <div class="card dashboard-stat p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="text-muted text-uppercase small fw-semibold mb-2">Ukupno računa</div>
+                            <div class="dashboard-stat__value"><?php echo (int)($stats['total_invoices'] ?? 0); ?></div>
+                            <div class="dashboard-stat__hint mt-2">Svi izdani računi</div>
+                        </div>
+                        <div class="dashboard-stat__icon">R</div>
+                    </div>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card p-3 h-100">
-                    <h6 class="text-muted mb-2">Fiskalizirani</h6>
-                    <p class="display-6 mb-0"><?php echo (int)($stats['fiscalized_invoices'] ?? 0); ?></p>
+                <div class="card dashboard-stat p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="text-muted text-uppercase small fw-semibold mb-2">Fiskalizirani</div>
+                            <div class="dashboard-stat__value"><?php echo (int)($stats['fiscalized_invoices'] ?? 0); ?></div>
+                            <div class="dashboard-stat__hint mt-2">Uspješno poslani u FINA-u</div>
+                        </div>
+                        <div class="dashboard-stat__icon text-success bg-success bg-opacity-10">F</div>
+                    </div>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card p-3 h-100">
-                    <h6 class="text-muted mb-2">Nefiskalizirani</h6>
-                    <p class="display-6 mb-0"><?php echo (int)($stats['not_fiscalized_invoices'] ?? 0); ?></p>
+                <div class="card dashboard-stat p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="text-muted text-uppercase small fw-semibold mb-2">Nefiskalizirani</div>
+                            <div class="dashboard-stat__value"><?php echo (int)($stats['not_fiscalized_invoices'] ?? 0); ?></div>
+                            <div class="dashboard-stat__hint mt-2">Čekaju fiskalizaciju</div>
+                        </div>
+                        <div class="dashboard-stat__icon text-danger bg-danger bg-opacity-10">N</div>
+                    </div>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card p-3 h-100">
-                    <h6 class="text-muted mb-2">Prihod</h6>
-                    <p class="display-6 mb-0"><?php echo number_format((float)($stats['revenue'] ?? 0), 2, ',', '.'); ?> EUR</p>
+                <div class="card dashboard-stat p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="text-muted text-uppercase small fw-semibold mb-2">Prihod</div>
+                            <div class="dashboard-stat__value"><?php echo number_format((float)($stats['revenue'] ?? 0), 2, ',', '.'); ?></div>
+                            <div class="dashboard-stat__hint mt-2">EUR ukupnog prometa</div>
+                        </div>
+                        <div class="dashboard-stat__icon text-warning bg-warning bg-opacity-10">€</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-lg-8 mb-3">
-                <div class="card p-3 h-100">
+                <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Zadnji računi</h5>
-                        <a class="btn btn-outline-secondary btn-sm" href="invoices.php">Otvori </a>
+                        <div class="dashboard-panel__title">
+                            <span class="dashboard-panel__dot"></span>
+                            <h5 class="mb-0">Zadnji računi</h5>
+                        </div>
+                        <a class="btn btn-outline-secondary btn-sm" href="invoices.php">Otvori</a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle">
+                        <table class="table table-sm table-hover align-middle dashboard-table">
                             <thead>
                                 <tr>
-                                    <th>Računi  </th>
+                                    <th>Račun</th>
                                     <th>Datum</th>
                                     <th>Kupac</th>
                                     <th>Status</th>
@@ -151,14 +293,14 @@ if ($companyId > 0) {
                                         }
                                         ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($fullInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td><div class="fw-semibold"><?php echo htmlspecialchars($fullInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?></div></td>
                                             <td><?php echo !empty($invoice['insert_time']) ? htmlspecialchars(date('d.m.Y', strtotime((string)$invoice['insert_time'])), ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                             <td><?php echo htmlspecialchars((string)($invoice['customer_name'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
                                             <td>
                                                 <?php if ($isFiscalized) { ?>
-                                                    <span class="badge bg-success">Fiskalizirani</span>
+                                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Fiskalizirani</span>
                                                 <?php } else { ?>
-                                                    <span class="badge bg-danger">Nefiskalizirani</span>
+                                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle">Nefiskalizirani</span>
                                                 <?php } ?>
                                             </td>
                                             <td class="text-end"><?php echo number_format((float)($invoice['total_price'] ?? 0), 2, ',', '.'); ?> EUR</td>
@@ -166,7 +308,7 @@ if ($companyId > 0) {
                                     <?php } ?>
                                 <?php } else { ?>
                                     <tr>
-                                        <td colspan="5" class="text-muted text-center py-4">Nema računa za tvrtku još!</td>
+                                        <td colspan="5" class="text-muted text-center py-4">Nema računa za tvrtku još.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -175,28 +317,34 @@ if ($companyId > 0) {
                 </div>
             </div>
             <div class="col-lg-4 mb-3">
-                <div class="card p-3 h-100">
+                <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Kupci po prometu</h5>
+                        <div class="dashboard-panel__title">
+                            <span class="dashboard-panel__dot"></span>
+                            <h5 class="mb-0">Kupci po prometu</h5>
+                        </div>
                         <a class="btn btn-outline-primary btn-sm" href="customers.php">Otvori</a>
                     </div>
                     <?php if (!empty($topCustomers)) { ?>
-                        <div class="list-group list-group-flush">
+                        <div>
                             <?php foreach ($topCustomers as $customerStat) { ?>
                                 <?php
                                 $customerTotal = (float)($customerStat['total_amount'] ?? 0);
                                 $revenueTotal = (float)($stats['revenue'] ?? 0);
                                 $customerPercent = $revenueTotal > 0 ? (int)(($customerTotal / $revenueTotal) * 100) : 0;
                                 ?>
-                                <div class="list-group-item px-0">
-                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div class="dashboard-customer-item">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                         <div>
                                             <div class="fw-semibold"><?php echo htmlspecialchars((string)($customerStat['full_name'] ?? 'Nepoznati kupac'), ENT_QUOTES, 'UTF-8'); ?></div>
-                                            <div class="small text-body-secondary"><?php echo (int)round($customerPercent); ?>%</div>
+                                            <div class="small text-body-secondary"><?php echo (int)round($customerPercent); ?>% ukupnog prometa</div>
                                         </div>
                                         <div class="text-end fw-semibold">
                                             <?php echo number_format($customerTotal, 2, ',', '.'); ?> EUR
                                         </div>
+                                    </div>
+                                    <div class="dashboard-customer-progress">
+                                        <div class="dashboard-customer-progress__bar" style="width: <?php echo max(0, min(100, (int)round($customerPercent))); ?>%;"></div>
                                     </div>
                                 </div>
                             <?php } ?>
@@ -215,5 +363,3 @@ if ($companyId > 0) {
     <script src="../assets/js/main1.js?v=8"></script>
 </body>
 </html>
-
-

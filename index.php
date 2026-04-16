@@ -17,7 +17,7 @@ if (isset($_SESSION['user_id'])) {
 <body>
     <div class="container">
         <div class="left-panel">
-            <h1>B2C Fiskalizacija 2.0</h1>
+            <h1>Fiscalio</h1>
             <p class="subtitle">
                 Web aplikacija za unos, pregled i fiskalizaciju računa prema sustavu Porezne uprave Republike Hrvatske.
             </p>
@@ -56,7 +56,7 @@ if (isset($_SESSION['user_id'])) {
 
                 <p id="loginMessage" class="form-message"></p>
 
-                <p class="note">Demo verzija prototipa za seminarski i poslovni razvoj.</p>
+                <p class="note">Demo verzija</p>
             </div>
         </div>
     </div>

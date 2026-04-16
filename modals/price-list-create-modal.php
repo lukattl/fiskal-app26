@@ -1,7 +1,7 @@
 <div class="modal fade" id="newPriceListModal" tabindex="-1" aria-labelledby="newPriceListModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form data-json-form data-endpoint="../api/create-price-list.php" data-success-message="Article created successfully.">
+            <form data-json-form data-endpoint="../api/create-price-list.php" data-success-message="Artikl uspješno spremljen!" data-error-message="Došlo je do greške prilikom spremanja artikla. Pokušajte ponovo.">
                 <div class="modal-header">
                     <h2 class="modal-title fs-5" id="newPriceListModalLabel">Novi artikl</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

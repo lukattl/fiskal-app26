@@ -92,7 +92,7 @@ try {
     $db = DB::getInstance();
     $conn = $db->getConn();
 
-    $invoiceCheckStmt = $conn->prepare('SELECT id, number, jir, fiskaled_at FROM invoices WHERE id = ? AND company_id = ? LIMIT 1');
+    $invoiceCheckStmt = $conn->prepare('SELECT id, number, jir, fiskaled_at, DATE(insert_time) AS invoice_date FROM invoices WHERE id = ? AND company_id = ? LIMIT 1');
     $invoiceCheckStmt->execute([$invoiceId, $company['id']]);
     $existingInvoice = $invoiceCheckStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -112,6 +112,23 @@ try {
             "message" => "Fiskalizirani racun se vise ne moze mijenjati."
         ]);
         exit;
+    }
+
+    $currentInvoiceDate = (string)($existingInvoice['invoice_date'] ?? '');
+    if ($invoiceDate !== $currentInvoiceDate) {
+        $lastIssuedInvoiceDateStmt = $conn->prepare('SELECT DATE(insert_time) AS invoice_date FROM invoices WHERE company_id = ? AND bunit_id = ? AND id <> ? ORDER BY insert_time DESC, id DESC LIMIT 1');
+        $lastIssuedInvoiceDateStmt->execute([$company['id'], $bunitId, $invoiceId]);
+        $lastIssuedInvoiceDateRow = $lastIssuedInvoiceDateStmt->fetch(PDO::FETCH_ASSOC);
+        $lastIssuedInvoiceDate = (string)($lastIssuedInvoiceDateRow['invoice_date'] ?? '');
+
+        if ($lastIssuedInvoiceDate !== '' && $invoiceDate < $lastIssuedInvoiceDate) {
+            http_response_code(400);
+            echo json_encode([
+                "success" => false,
+                "message" => "Datum racuna ne moze biti stariji od zadnjeg izdanog racuna."
+            ]);
+            exit;
+        }
     }
 
     $allowedPayments = ['cash_payment'];
@@ -147,7 +164,7 @@ try {
 
     $customerData = [
         'full_name' => $customerFullName,
-        'legal' => !empty($customerPayload['legal']) ? 1 : 0,
+        'legal' => (string)($customerPayload['legal'] ?? '') === '2' || !empty($customerPayload['legal_government']) ? 2 : (!empty($customerPayload['legal']) ? 1 : 0),
         'address' => trim((string)($customerPayload['address'] ?? '')),
         'city' => trim((string)($customerPayload['city'] ?? '')),
         'country' => trim((string)($customerPayload['country'] ?? '')),

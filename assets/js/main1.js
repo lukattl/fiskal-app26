@@ -205,6 +205,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll("form").forEach((form) => {
+        const legalToggle = form.querySelector('[name="legal"]');
+        const governmentToggle = form.querySelector('[name="legal_government"]');
+
+        if (!legalToggle || !governmentToggle) {
+            return;
+        }
+
+        legalToggle.addEventListener("change", () => {
+            if (legalToggle.checked) {
+                governmentToggle.checked = false;
+            }
+        });
+
+        governmentToggle.addEventListener("change", () => {
+            if (governmentToggle.checked) {
+                legalToggle.checked = false;
+            }
+        });
+    });
+
     instantToggles.forEach((toggle) => {
         toggle.addEventListener("change", async () => {
             const endpoint = toggle.dataset.endpoint;
@@ -311,9 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (invoiceForm) {
         const invoiceCustomers = readJsonScript("invoiceCustomersData");
         const invoiceArticles = readJsonScript("invoiceArticlesData");
-        const invoicePrefill = typeof window.invoicePrefillData !== "undefined"
-            ? window.invoicePrefillData
-            : (document.getElementById("invoicePrefillData") ? readJsonScript("invoicePrefillData") : null);
+        const invoicePrefill = typeof window.invoicePrefillData !== "undefined" ? window.invoicePrefillData : (document.getElementById("invoicePrefillData") ? readJsonScript("invoicePrefillData") : null);
         const invoicePayment = invoiceForm.querySelector("#invoice-payment");
         const invoiceUpdateEndpoint = invoiceForm.dataset.updateEndpoint || "";
         const invoiceMessage = document.getElementById("invoiceFormMessage");
@@ -324,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const customerFullName = invoiceForm.querySelector("#invoice-customer-full-name");
         const customerOib = invoiceForm.querySelector("#invoice-customer-oib");
         const customerLegal = invoiceForm.querySelector("#invoice-customer-legal");
+        const customerGovernment = invoiceForm.querySelector("#invoice-customer-government");
         const customerAddress = invoiceForm.querySelector("#invoice-customer-address");
         const customerCity = invoiceForm.querySelector("#invoice-customer-city");
         const customerCountry = invoiceForm.querySelector("#invoice-customer-country");
@@ -334,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const invoiceDateHeading = invoiceForm.querySelector("[data-invoice-date-heading]");
         const invoiceDueDateLabel = invoiceForm.querySelector("[data-invoice-due-date-label]");
         const invoiceCustomerTypeCode = invoiceForm.querySelector("[data-invoice-customer-type-code]");
+        const lastIssuedInvoiceDate = (invoiceForm.dataset.lastIssuedDate || "").trim();
         const articleSearch = invoiceForm.querySelector("#invoice-article-search");
         const articleSuggestions = invoiceForm.querySelector("#invoice-article-suggestions");
         const addInvoiceArticleButton = invoiceForm.querySelector("#addInvoiceArticleButton");
@@ -375,7 +396,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            invoiceCustomerTypeCode.textContent = customerLegal && customerLegal.checked ? "F1" : "F2";
+            const isBusinessCustomer = (customerLegal && customerLegal.checked) || (customerGovernment && customerGovernment.checked);
+            invoiceCustomerTypeCode.textContent = isBusinessCustomer ? "F2" : "F1";
         };
 
         const setInvoiceTitle = (invoiceNumber, isDraft) => {
@@ -453,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 remark: invoiceRemark ? invoiceRemark.value.trim() : "",
                 customer: {
                     full_name: customerFullName.value.trim(),
-                    legal: customerLegal && customerLegal.checked ? 1 : 0,
+                    legal: customerGovernment && customerGovernment.checked ? 2 : (customerLegal && customerLegal.checked ? 1 : 0),
                     address: customerAddress.value.trim(),
                     city: customerCity.value.trim(),
                     country: customerCountry.value.trim(),
@@ -469,6 +491,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (invoiceMessage) {
                     invoiceMessage.className = "alert alert-danger";
                     invoiceMessage.textContent = "Select at least one article.";
+                }
+                return false;
+            }
+
+            if (!currentInvoiceId && lastIssuedInvoiceDate && payload.invoice_date && payload.invoice_date < lastIssuedInvoiceDate) {
+                if (invoiceMessage) {
+                    invoiceMessage.className = "alert alert-danger";
+                    invoiceMessage.textContent = "Datum računa ne može biti stariji od zadnjeg izdanog računa.";
                 }
                 return false;
             }
@@ -551,8 +581,29 @@ document.addEventListener("DOMContentLoaded", () => {
             }) || null;
         };
 
+        const clearCustomerFields = (preservePrimaryFields = false) => {
+            if (!preservePrimaryFields) {
+                customerFullName.value = "";
+                customerOib.value = "";
+            }
+            if (customerLegal) {
+                customerLegal.checked = false;
+            }
+            if (customerGovernment) {
+                customerGovernment.checked = false;
+            }
+            customerAddress.value = "";
+            customerCity.value = "";
+            customerCountry.value = "";
+            customerEmail.value = "";
+            syncInvoiceCustomerTypeCode();
+        };
+
         const fillCustomerFields = (customer) => {
             if (!customer) {
+                if (!customerFullName.value.trim() && !customerOib.value.trim()) {
+                    clearCustomerFields(true);
+                }
                 return;
             }
 
@@ -560,6 +611,9 @@ document.addEventListener("DOMContentLoaded", () => {
             customerOib.value = customer.oib || "";
             if (customerLegal) {
                 customerLegal.checked = String(customer.legal || "0") === "1";
+            }
+            if (customerGovernment) {
+                customerGovernment.checked = String(customer.legal || "0") === "2";
             }
             customerAddress.value = customer.address || "";
             customerCity.value = customer.city || "";
@@ -704,15 +758,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
         invoiceDate?.addEventListener("change", syncInvoiceDates);
         invoiceDueDate?.addEventListener("change", syncInvoiceDates);
-        customerLegal?.addEventListener("change", syncInvoiceCustomerTypeCode);
+        customerLegal?.addEventListener("change", () => {
+            if (customerLegal.checked && customerGovernment) {
+                customerGovernment.checked = false;
+            }
+            syncInvoiceCustomerTypeCode();
+        });
+        customerGovernment?.addEventListener("change", () => {
+            if (customerGovernment.checked && customerLegal) {
+                customerLegal.checked = false;
+            }
+            syncInvoiceCustomerTypeCode();
+        });
 
         customerFullName?.addEventListener("change", () => {
             fillCustomerFields(findCustomer(customerFullName.value, "full_name"));
+        });
+        customerFullName?.addEventListener("input", () => {
+            if (!customerFullName.value.trim() && !customerOib.value.trim()) {
+                clearCustomerFields(true);
+                return;
+            }
+            syncInvoiceCustomerTypeCode();
         });
 
         customerOib?.addEventListener("change", () => {
             fillCustomerFields(findCustomer(customerOib.value, "oib"));
         });
+        customerOib?.addEventListener("input", () => {
+            if (!customerFullName.value.trim() && !customerOib.value.trim()) {
+                clearCustomerFields(true);
+                return;
+            }
+            syncInvoiceCustomerTypeCode();
+        });
+        customerAddress?.addEventListener("input", syncInvoiceCustomerTypeCode);
+        customerCity?.addEventListener("input", syncInvoiceCustomerTypeCode);
+        customerCountry?.addEventListener("input", syncInvoiceCustomerTypeCode);
+        customerEmail?.addEventListener("input", syncInvoiceCustomerTypeCode);
 
         const findArticle = (searchValue) => {
             const term = (searchValue || "").trim().toLowerCase();
@@ -947,6 +1030,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 customerOib.value = invoicePrefill.customer.oib || "";
                 if (customerLegal) {
                     customerLegal.checked = String(invoicePrefill.customer.legal || "0") === "1";
+                }
+                if (customerGovernment) {
+                    customerGovernment.checked = String(invoicePrefill.customer.legal || "0") === "2";
                 }
                 customerAddress.value = invoicePrefill.customer.address || "";
                 customerCity.value = invoicePrefill.customer.city || "";

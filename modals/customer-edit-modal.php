@@ -1,4 +1,4 @@
-<?php if (!empty($customers)) { ?>
+﻿<?php if (!empty($customers)) { ?>
     <?php foreach ($customers as $customer) { ?>
         <div class="modal fade" id="editCustomerModal-<?php echo (int)($customer['id'] ?? 0); ?>" tabindex="-1" aria-labelledby="editCustomerModalLabel-<?php echo (int)($customer['id'] ?? 0); ?>" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -38,9 +38,15 @@
                                     <input class="form-control" type="email" id="customer-email-<?php echo (int)($customer['id'] ?? 0); ?>" name="email" value="<?php echo htmlspecialchars((string)($customer['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                 </div>
                                 <div class="col-12">
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" id="customer-legal-<?php echo (int)($customer['id'] ?? 0); ?>" name="legal" value="1" <?php echo !empty($customer['legal']) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="customer-legal-<?php echo (int)($customer['id'] ?? 0); ?>">Pravna osoba / Poduzeće</label>
+                                    <div class="d-flex flex-wrap gap-4 mt-2">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="customer-legal-<?php echo (int)($customer['id'] ?? 0); ?>" name="legal" value="1" <?php echo (string)($customer['legal'] ?? '0') === '1' ? 'checked' : ''; ?>>
+                                            <label class="form-check-label" for="customer-legal-<?php echo (int)($customer['id'] ?? 0); ?>">Pravna osoba / Poduzeće</label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="customer-government-<?php echo (int)($customer['id'] ?? 0); ?>" name="legal_government" value="1" <?php echo (string)($customer['legal'] ?? '0') === '2' ? 'checked' : ''; ?>>
+                                            <label class="form-check-label" for="customer-government-<?php echo (int)($customer['id'] ?? 0); ?>">Država</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

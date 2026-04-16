@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require '../core/init.php';
 $user = Helper::requireAuth();
 $company = Helper::currentCompany();
@@ -11,10 +11,11 @@ $invoicePayments = ['cash_payment' => 'Gotovina', 'card_payment' => 'Kartica', '
 $nextInvoiceNumber = 1;
 $defaultInvoiceDate = date('Y-m-d');
 $defaultDueDate = date('Y-m-d', strtotime('+15 days'));
+$lastIssuedInvoiceDate = '';
 $invoicePrefill = null;
 $fullName = htmlspecialchars($user['full_name'] ?? 'User', ENT_QUOTES, 'UTF-8');
 $pageTitle = 'New Invoice - fiskal-app';
-$pageKey = '';
+$pageKey = 'new-invoice';
 if (!empty($company['id'])) {
     $priceListQuery = $db->query('SELECT * FROM price_list WHERE company_id = ?', [$company['id']]);
     if (!$priceListQuery->getError() && $priceListQuery->getResults()) {
@@ -40,6 +41,16 @@ if (!empty($bunitId)) {
         if (!empty($bunitOptions['transactional_payment'])) {
             $invoicePayments['transactional_payment'] = 'Transakcijski';
         }
+    }
+
+    $lastIssuedInvoiceQuery = $db->query(
+        'SELECT DATE(insert_time) AS invoice_date FROM invoices WHERE company_id = ? AND bunit_id = ? ORDER BY insert_time DESC, id DESC',
+        [$company['id'] ?? 0, $bunitId],
+        1
+    );
+    if (!$lastIssuedInvoiceQuery->getError() && $lastIssuedInvoiceQuery->getResults()) {
+        $lastIssuedInvoiceRow = Helper::toArray($lastIssuedInvoiceQuery->getFirst());
+        $lastIssuedInvoiceDate = (string)($lastIssuedInvoiceRow['invoice_date'] ?? '');
     }
 }
 
@@ -112,7 +123,7 @@ if (!empty($company['id']) && $sourceInvoiceId > 0 && $prefillMode !== '') {
             'source_invoice_id' => $sourceInvoiceId,
             'customer' => [
                 'full_name' => (string)($sourceCustomer['full_name'] ?? ''),
-                'legal' => !empty($sourceCustomer['legal']) ? 1 : 0,
+                'legal' => (int)($sourceCustomer['legal'] ?? 0),
                 'address' => (string)($sourceCustomer['address'] ?? ''),
                 'city' => (string)($sourceCustomer['city'] ?? ''),
                 'country' => (string)($sourceCustomer['country'] ?? ''),
@@ -141,95 +152,116 @@ if (!isset($invoicePayments[$selectedInvoicePayment])) {
 $prefillInvoiceDate = (string)($invoicePrefill['invoice_date'] ?? $defaultInvoiceDate);
 $prefillDueDate = (string)($invoicePrefill['due_date'] ?? $defaultDueDate);
 $prefillRemark = (string)($invoicePrefill['remark'] ?? '');
+$prefillFiskalTypeCode = ((int)($prefillCustomer['legal'] ?? 0) > 0) ? 'F2' : 'F1';
 $invoicePrefillJson = json_encode($invoicePrefill, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 if ($invoicePrefillJson === false) {
     $invoicePrefillJson = 'null';
 }
 require '../includes/header.php';
 ?>
-<main class="invoice-page">
-    <style>
-        .invoice-page{width:100%;padding:0}.invoice-editor{background:#eef4fb;border-top:1px solid #c9d8ea;border-bottom:1px solid #c9d8ea}.invoice-bar{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.75rem 1rem;background:linear-gradient(180deg,#fbfdff 0%,#e8f0fb 100%);border-bottom:1px solid #c9d8ea}.invoice-bar__group{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.invoice-bar__title{margin:0;color:#0e4f92;font-size:1.2rem;font-weight:700}.invoice-wrap{padding:1rem}.invoice-box{background:#fff;border:1px solid #c8d8ed}.invoice-box__head{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.5rem .75rem;background:#d9e5f3;border-bottom:1px solid #c8d8ed;font-weight:600;color:#243b5f}.invoice-box__body{padding:.75rem}.invoice-customer-grid{display:grid;grid-template-columns:minmax(260px,2fr) minmax(180px,1fr) auto;gap:.75rem;align-items:end}.invoice-details-grid,.invoice-meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}.invoice-field label{display:block;margin-bottom:.22rem;font-size:.78rem;color:#61748e;font-weight:700;text-transform:uppercase;letter-spacing:.03em}.invoice-field--plain label{text-transform:none;letter-spacing:0;font-size:.95rem;font-weight:500;color:#243b5f}.invoice-field input,.invoice-field select,.invoice-note{border-radius:0;border-color:#b9cade;min-height:38px}.invoice-field input[type="date"]{padding-right:.75rem}.invoice-note{min-height:120px;resize:vertical}.invoice-hint{margin:.7rem 0 0;color:#7a8aa0}.invoice-section{margin-top:1rem}.invoice-search{display:grid;grid-template-columns:minmax(280px,1.8fr) auto;gap:.75rem;align-items:end;margin-bottom:.75rem}.invoice-table-wrap{border:1px solid #c8d8ed;background:#fff}.invoice-table{margin-bottom:0;min-width:1040px}.invoice-table thead th{background:#d6d6d6;color:#233856;border-bottom:1px solid #bcc9d9;white-space:nowrap}.invoice-table .form-control{border-radius:0;min-height:34px}.invoice-article-label{font-weight:600;color:#1d3659}.invoice-actions,.invoice-totals{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}.invoice-summary{margin-left:auto;min-width:320px;background:#fff;border:1px solid #c8d8ed;padding:.75rem 1rem}.invoice-summary__row{display:flex;justify-content:space-between;gap:1rem;padding:.25rem 0;color:#243b5f}.invoice-summary__row--strong{font-size:1.1rem;font-weight:700}.invoice-control{background:#fff;border:1px solid #c8d8ed;padding:.75rem 1rem;min-width:250px}@media (max-width:1199px){.invoice-customer-grid,.invoice-details-grid,.invoice-meta-grid,.invoice-search{grid-template-columns:1fr}}
-    </style>
-    <form id="newInvoiceForm" data-invoice-form data-endpoint="../api/create-invoice.php" data-update-endpoint="../api/update-invoice.php" class="invoice-editor" novalidate>
-        <div class="invoice-bar">
-            <div class="invoice-bar__group">
-                <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Natrag</a>
-
-                <button class="btn btn-outline-primary btn-sm d-none" type="button" id="saveInvoiceChangesButton">Spremi izmjene</button>
-            </div>
-            <h1 class="invoice-bar__title">Račun br. <span data-invoice-number-label><?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?></span> - Koncept</h1>
-            <div class="invoice-bar__group">
-                <button class="btn btn-primary btn-sm" type="submit">Izdaj račun</button>
+<main class="container-fluid px-3 px-xl-4 pt-0 pb-4">
+    <form id="newInvoiceForm" data-invoice-form data-endpoint="../api/create-invoice.php" data-update-endpoint="../api/update-invoice.php" data-last-issued-date="<?php echo htmlspecialchars($lastIssuedInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>" class="needs-validation" novalidate>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                <a class="btn btn-outline-secondary btn-sm rounded-pill px-3" href="invoices.php">Svi računi</a>
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-none" type="button" id="saveInvoiceChangesButton">Spremi izmjene</button>
+                </div>
+                <h1 class="invoice-bar__title h4 mb-0 text-primary fw-bold">Račun br. <span data-invoice-number-label><?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?></span> - Koncept</h1>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                <button class="btn btn-primary btn-sm rounded-pill px-4" type="submit">Izdaj račun</button>
+                </div>
             </div>
         </div>
-        <div class="invoice-wrap">
+        <div>
             <div class="alert d-none mb-3" id="invoiceFormMessage" role="alert"></div>
             <div class="row g-3">
                 <div class="col-12 col-md-6 col-xl-6">
-                    <section class="invoice-box h-100">
-                        <div class="invoice-box__head"><span>Kupac</span><button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Detalji</button></div>
-                        <div class="invoice-box__body">
-                            <div class="invoice-customer-grid">
-                                <div class="invoice-field invoice-field--plain">
-                                    <label for="invoice-customer-full-name">Puno ime</label>
+                    <section class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center gap-3 py-3">
+                            <span class="fw-semibold">Kupac</span>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Detalji</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-customer-full-name">Puno ime</label>
                                     <input class="form-control" type="text" id="invoice-customer-full-name" name="customer_full_name" list="invoice-customer-names" autocomplete="off" placeholder="Upišite ili odaberite kupca..." value="<?php echo htmlspecialchars((string)($prefillCustomer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                     <datalist id="invoice-customer-names"><?php foreach ($customers as $customer) { ?><option value="<?php echo htmlspecialchars((string)($customer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></option><?php } ?></datalist>
                                 </div>
-                                <div class="invoice-field invoice-field--plain">
-                                    <label for="invoice-customer-oib">OIB</label>
+                                <div class="col-lg-3">
+                                    <label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-customer-oib">OIB</label>
                                     <input class="form-control" type="text" id="invoice-customer-oib" name="customer_oib" list="invoice-customer-oibs" autocomplete="off" inputmode="numeric" maxlength="11" pattern="\d{11}" value="<?php echo htmlspecialchars((string)($prefillCustomer['oib'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                     <datalist id="invoice-customer-oibs"><?php foreach ($customers as $customer) { ?><option value="<?php echo htmlspecialchars((string)($customer['oib'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></option><?php } ?></datalist>
                                 </div>
-                                <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" role="switch" id="invoice-customer-legal" name="customer_legal" value="1" <?php echo !empty($prefillCustomer['legal']) ? 'checked' : ''; ?>><label class="form-check-label" for="invoice-customer-legal">Pravna osoba</label></div>
+                                <div class="col-lg-3">
+                                <div class="d-flex flex-wrap gap-3 border rounded-3 px-3 py-2 bg-light">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="invoice-customer-legal" name="customer_legal" value="1" <?php echo (string)($prefillCustomer['legal'] ?? '0') === '1' ? 'checked' : ''; ?>>
+                                        <label class="form-check-label" for="invoice-customer-legal">Pravna osoba</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="invoice-customer-government" name="customer_government" value="1" <?php echo (string)($prefillCustomer['legal'] ?? '0') === '2' ? 'checked' : ''; ?>>
+                                        <label class="form-check-label" for="invoice-customer-government">Država</label>
+                                    </div>
+                                </div>
+                                </div>
                             </div>
                            
                             <div class="collapse mt-3" id="invoiceCustomerDetails">
-                                <div class="invoice-details-grid">
-                                    <div class="invoice-field"><label for="invoice-customer-address">Adresa</label><input class="form-control" type="text" id="invoice-customer-address" name="customer_address" value="<?php echo htmlspecialchars((string)($prefillCustomer['address'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                    <div class="invoice-field"><label for="invoice-customer-city">Grad</label><input class="form-control" type="text" id="invoice-customer-city" name="customer_city" value="<?php echo htmlspecialchars((string)($prefillCustomer['city'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                    <div class="invoice-field"><label for="invoice-customer-country">Država</label><input class="form-control" type="text" id="invoice-customer-country" name="customer_country" value="<?php echo htmlspecialchars((string)($prefillCustomer['country'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                    <div class="invoice-field"><label for="invoice-customer-email">Email</label><input class="form-control" type="email" id="invoice-customer-email" name="customer_email" value="<?php echo htmlspecialchars((string)($prefillCustomer['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                <div class="row g-3">
+                                    <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-customer-address">Adresa</label><input class="form-control" type="text" id="invoice-customer-address" name="customer_address" value="<?php echo htmlspecialchars((string)($prefillCustomer['address'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                    <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-customer-city">Grad</label><input class="form-control" type="text" id="invoice-customer-city" name="customer_city" value="<?php echo htmlspecialchars((string)($prefillCustomer['city'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                    <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-customer-country">Država</label><input class="form-control" type="text" id="invoice-customer-country" name="customer_country" value="<?php echo htmlspecialchars((string)($prefillCustomer['country'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                    <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-customer-email">Email</label><input class="form-control" type="email" id="invoice-customer-email" name="customer_email" value="<?php echo htmlspecialchars((string)($prefillCustomer['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></div>
                                 </div>
                             </div>
                         </div>
                     </section>
                 </div>
                 <div class="col-12 col-md-6 col-xl-6">
-                    <section class="invoice-box h-100">
-                        <div class="invoice-box__head"><span>Zagreb, datum <span data-invoice-date-heading><?php echo htmlspecialchars(date('d.m.Y', strtotime($defaultInvoiceDate)), ENT_QUOTES, 'UTF-8'); ?></span></span><span><span data-invoice-customer-type-code>F2</span> R1</span></div>
-                        <div class="invoice-box__body">
-                            <div class="invoice-meta-grid">
-                                <div class="invoice-field"><label for="invoice-number-preview">Broj računa</label><input class="form-control" type="text" id="invoice-number-preview" value="<?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?>" readonly></div>
-                                <div class="invoice-field"><label for="invoice-payment">Plaćanje</label><select class="form-select" id="invoice-payment" name="payment"><?php foreach ($invoicePayments as $paymentValue => $paymentLabel) { ?><option value="<?php echo htmlspecialchars($paymentValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedInvoicePayment === $paymentValue ? 'selected' : ''; ?>><?php echo htmlspecialchars($paymentLabel, ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
-                                <div class="invoice-field"><label for="invoice-date">Datum računa</label><input class="form-control" type="date" id="invoice-date" name="invoice_date" value="<?php echo htmlspecialchars($prefillInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                <div class="invoice-field"><label for="invoice-due-date">Datum dospijeća</label><input class="form-control" type="date" id="invoice-due-date" name="due_date" value="<?php echo htmlspecialchars($prefillDueDate, ENT_QUOTES, 'UTF-8'); ?>"></div>
+                    <section class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center gap-3 py-3"><span class="fw-semibold">Zagreb, datum <span data-invoice-date-heading><?php echo htmlspecialchars(date('d.m.Y', strtotime($prefillInvoiceDate)), ENT_QUOTES, 'UTF-8'); ?></span></span><span class="badge rounded-pill text-bg-primary"><span data-invoice-customer-type-code><?php echo $prefillFiskalTypeCode; ?></span> R1</span></div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-number-preview">Broj računa</label><input class="form-control" type="text" id="invoice-number-preview" value="<?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?>" readonly></div>
+                                <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-payment">Plaćanje</label><select class="form-select" id="invoice-payment" name="payment"><?php foreach ($invoicePayments as $paymentValue => $paymentLabel) { ?><option value="<?php echo htmlspecialchars($paymentValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedInvoicePayment === $paymentValue ? 'selected' : ''; ?>><?php echo htmlspecialchars($paymentLabel, ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
+                                <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-date">Datum računa</label><input class="form-control" type="date" id="invoice-date" name="invoice_date" value="<?php echo htmlspecialchars($prefillInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $lastIssuedInvoiceDate !== '' ? 'min="' . htmlspecialchars($lastIssuedInvoiceDate, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>></div>
+                                <div class="col-md-6 col-xl-3"><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-due-date">Datum dospijeća</label><input class="form-control" type="date" id="invoice-due-date" name="due_date" value="<?php echo htmlspecialchars($prefillDueDate, ENT_QUOTES, 'UTF-8'); ?>"></div>
                             </div>
-                            <div class="mt-3 text-body-secondary">
-                                <div><strong>Dospijeće:</strong> <span data-invoice-due-date-label><?php echo htmlspecialchars(date('d.m.Y', strtotime($prefillDueDate)), ENT_QUOTES, 'UTF-8'); ?></span></div>
-                                <div><strong>Poslovna jedinica:</strong> <?php echo htmlspecialchars((string)($bunit['name'] ?? $bunit['label'] ?? 'Default unit'), ENT_QUOTES, 'UTF-8'); ?></div>
-                                <div><strong>Tip računa:</strong> Maloprodajni račun - cijene bez PDV-a</div>
-                                <div><strong>Jezik:</strong> HR</div>
+                            <?php if ($lastIssuedInvoiceDate !== '') { ?>
+                                <div class="form-text mt-2">Najraniji dozvoljeni datum izdavanja je <?php echo htmlspecialchars(date('d.m.Y', strtotime($lastIssuedInvoiceDate)), ENT_QUOTES, 'UTF-8'); ?>.</div>
+                            <?php } ?>
+                            <div class="list-group list-group-flush small mt-3">
+                                <div class="list-group-item px-0 d-flex justify-content-between gap-3"><span class="text-secondary">Dospijeće</span><strong data-invoice-due-date-label><?php echo htmlspecialchars(date('d.m.Y', strtotime($prefillDueDate)), ENT_QUOTES, 'UTF-8'); ?></strong></div>
+                                <div class="list-group-item px-0 d-flex justify-content-between gap-3"><span class="text-secondary">Poslovna jedinica</span><strong><?php echo htmlspecialchars((string)($bunit['name'] ?? $bunit['label'] ?? 'Default unit'), ENT_QUOTES, 'UTF-8'); ?></strong></div>
+                                <div class="list-group-item px-0 d-flex justify-content-between gap-3"><span class="text-secondary">Tip računa</span><strong>Maloprodajni račun</strong></div>
+                                <div class="list-group-item px-0 d-flex justify-content-between gap-3"><span class="text-secondary">Jezik</span><strong>HR</strong></div>
                             </div>
                         </div>
                     </section>
                 </div>
             </div>
-            <section class="invoice-box invoice-section">
-                <div class="invoice-box__head"><span>Artikli</span></div>
-                <div class="invoice-box__body">
+            <section class="card shadow-sm border-0 mt-3">
+                <div class="card-header bg-white py-3"><span class="fw-semibold">Artikli</span></div>
+                <div class="card-body">
                     <?php if (!empty($priceListRows)) { ?>
-                        <div class="invoice-search">
-                            <div class="invoice-field position-relative">
-                                <label for="invoice-article-search">Pretraži artikal</label>
-                                <input class="form-control" type="text" id="invoice-article-search" autocomplete="off" placeholder="Pretraži artikal po nazivu">
+                        <div class="row g-3 align-items-end mb-3">
+                            <div class="col-lg-8 position-relative">
+                                <label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-article-search">Pretraži artikal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">🔎</span>
+                                    <input class="form-control border-start-0" type="text" id="invoice-article-search" autocomplete="off" placeholder="Pretraži artikal po nazivu">
+                                </div>
                                 <div class="list-group position-absolute start-0 end-0 mt-1 shadow-sm d-none" id="invoice-article-suggestions" style="z-index:1055;max-height:220px;overflow-y:auto;"></div>
                             </div>
-                            <button class="btn btn-primary" type="button" id="invoiceSecondaryAddArticleButton">Dodaj artikal</button>
+                            <div class="col-lg-4 d-grid d-lg-flex justify-content-lg-end">
+                                <button class="btn btn-primary rounded-pill px-4" type="button" id="invoiceSecondaryAddArticleButton">Dodaj artikal</button>
+                            </div>
                         </div>
-                        <div class="invoice-table-wrap table-responsive">
-                            <table class="table table-sm align-middle invoice-table">
-                                <thead><tr><th>#</th><th>Artikl / Usluga</th><th>Kol</th><th>Jedinica</th><th>Cijena bez PDV-a</th><th>Popust %</th><th>PDV %</th><th>Napojnica</th><th>Ukupno</th><th class="text-end"></th></tr></thead>
+                        <div class="table-responsive border rounded-4">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light"><tr><th>#</th><th>Artikl / Usluga</th><th>Kol</th><th>Jedinica</th><th>Cijena bez PDV-a</th><th>Popust %</th><th>PDV %</th><th>Napojnica</th><th>Ukupno</th><th class="text-end"></th></tr></thead>
                                 <tbody id="invoiceArticlesTableBody"></tbody>
                             </table>
                         </div>
@@ -248,16 +280,24 @@ require '../includes/header.php';
                             </tr>
                         </template>
                     <?php } else { ?><p class="text-muted mb-0">Nema pronađenih artikla</p><?php } ?>
-                    <div class="invoice-actions mt-3">
-                        <div class="invoice-control">Artikli: <strong data-invoice-item-count>0</strong></div>
-                        <div class="invoice-summary">
-                            <div class="invoice-summary__row"><span>Ukupno bez PDV-a</span><span data-invoice-total-base>0.00 EUR</span></div>
-                            <div class="invoice-summary__row"><span>PDV iznos</span><span data-invoice-total-vat>0.00 EUR</span></div>
-                            <div class="invoice-summary__row invoice-summary__row--strong"><span>Iznos </span><span data-invoice-grand-total>0.00 EUR</span></div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-lg-4">
+                            <div class="card bg-light border-0 h-100">
+                                <div class="card-body">Artikli: <strong data-invoice-item-count>0</strong></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between gap-3 py-1"><span>Ukupno bez PDV-a</span><span data-invoice-total-base>0.00 EUR</span></div>
+                                    <div class="d-flex justify-content-between gap-3 py-1"><span>PDV iznos</span><span data-invoice-total-vat>0.00 EUR</span></div>
+                                    <div class="d-flex justify-content-between gap-3 py-1 fw-bold fs-5"><span>Iznos</span><span data-invoice-grand-total>0.00 EUR</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-3">
-                        <div class="invoice-field"><label for="invoice-ending-note">Završni tekst</label><textarea class="form-control invoice-note" id="invoice-ending-note" rows="4"><?php echo htmlspecialchars($prefillRemark, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
+                        <div><label class="form-label fw-semibold small text-uppercase text-secondary mb-1" for="invoice-ending-note">Završni tekst</label><textarea class="form-control" id="invoice-ending-note" rows="4"><?php echo htmlspecialchars($prefillRemark, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
                     </div>
                 </div>
             </section>
@@ -273,4 +313,6 @@ require '../includes/header.php';
 <script src="../assets/js/main1.js?v=11"></script>
 </body>
 </html>
+
+
 

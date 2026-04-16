@@ -3,7 +3,7 @@
         <div class="modal fade" id="editPriceListModal-<?php echo (int)($article['id'] ?? 0); ?>" tabindex="-1" aria-labelledby="editPriceListModalLabel-<?php echo (int)($article['id'] ?? 0); ?>" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <form data-json-form data-endpoint="../api/update-price-list.php" data-success-message="Article updated successfully.">
+                    <form data-json-form data-endpoint="../api/update-price-list.php" data-success-message="Artikl uspješno ažuriran!" data-error-message="Došlo je do greške prilikom ažuriranja artikla. Pokušajte ponovo.">
                         <div class="modal-header">
                             <h2 class="modal-title fs-5" id="editPriceListModalLabel-<?php echo (int)($article['id'] ?? 0); ?>">Uredi artikal</h2>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

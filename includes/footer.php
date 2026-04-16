@@ -1,4 +1,4 @@
-<style>
+﻿<style>
     html,
     body {
         min-height: 100%;
@@ -12,14 +12,18 @@
 
     .app-footer {
         margin-top: auto;
-        border-top: 1px solid #d8deea;
-        background: #ffffff;
+        border-top: 1px solid #dbe4f0;
+        background:
+            radial-gradient(circle at bottom right, rgba(13, 110, 253, 0.08), transparent 20rem),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(244, 247, 251, 0.99) 100%);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 -10px 26px rgba(15, 23, 42, 0.03);
     }
 
     .app-footer__inner {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 1.25rem 1rem;
+        padding: 1.35rem 1rem;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -28,13 +32,29 @@
     }
 
     .app-footer__text {
-        color: #4b5563;
+        color: #516579;
         font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .app-footer__eyebrow {
+        display: block;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 700;
+        color: #8a99ab;
+        margin-bottom: 0.15rem;
+    }
+
+    .app-footer__text strong {
+        color: #17324d;
     }
 
     .app-footer__text a {
         color: #0d6efd;
         text-decoration: none;
+        font-weight: 600;
     }
 
     .app-footer__text a:hover {
@@ -48,23 +68,26 @@
     }
 
     .app-footer__icon {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 999px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         border: 1px solid #d8deea;
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.9);
         color: #1f2937;
         text-decoration: none;
-        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
     }
 
     .app-footer__icon:hover {
+        transform: translateY(-1px);
         background: #e9f2ff;
         border-color: #9ec5fe;
         color: #0d6efd;
+        box-shadow: 0 12px 26px rgba(13, 110, 253, 0.12);
     }
 
     .app-footer__icon svg {
@@ -76,7 +99,8 @@
 <footer class="app-footer">
     <div class="app-footer__inner">
         <div class="app-footer__text">
-            Support and onboarding help:
+            <span class="app-footer__eyebrow">Support</span>
+            <strong>Support and onboarding help:</strong>
             <a href="mailto:luka@tvz.hr">luka@tvz.hr</a>
         </div>
         <div class="app-footer__socials" aria-label="Support links">

@@ -47,7 +47,7 @@ try {
         'country' => trim((string)($payload['country'] ?? '')),
         'oib' => trim((string)($payload['oib'] ?? '')),
         'email' => trim((string)($payload['email'] ?? '')),
-        'legal' => !empty($payload['legal']) ? 1 : 0,
+        'legal' => !empty($payload['legal_government']) ? 2 : (!empty($payload['legal']) ? 1 : 0),
     ];
 
     if ($updates['full_name'] === '') {

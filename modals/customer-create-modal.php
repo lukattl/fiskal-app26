@@ -1,4 +1,4 @@
-<div class="modal fade" id="newCustomerModal" tabindex="-1" aria-labelledby="newCustomerModalLabel" aria-hidden="true">
+﻿<div class="modal fade" id="newCustomerModal" tabindex="-1" aria-labelledby="newCustomerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form data-json-form data-endpoint="../api/create-customer.php" data-success-message="Customer created successfully.">
@@ -34,9 +34,15 @@
                             <input class="form-control" type="email" id="new-customer-email" name="email">
                         </div>
                         <div class="col-12">
-                            <div class="form-check form-switch mt-2">
-                                <input class="form-check-input" type="checkbox" id="new-customer-legal" name="legal" value="1">
-                                <label class="form-check-label" for="new-customer-legal">Pravna osoba / Poduzeće</label>
+                            <div class="d-flex flex-wrap gap-4 mt-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="new-customer-legal" name="legal" value="1">
+                                    <label class="form-check-label" for="new-customer-legal">Pravna osoba / Poduzeće</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="new-customer-government" name="legal_government" value="1">
+                                    <label class="form-check-label" for="new-customer-government">Država</label>
+                                </div>
                             </div>
                         </div>
                     </div>
