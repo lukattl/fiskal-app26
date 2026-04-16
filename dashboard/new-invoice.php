@@ -7,7 +7,7 @@ $db = DB::getInstance();
 $priceListRows = [];
 $customers = [];
 $bunit = [];
-$invoicePayments = ['cash_payment' => 'Cash payment'];
+$invoicePayments = ['cash_payment' => 'Gotovina', 'card_payment' => 'Kartica', 'transactional_payment' => 'Transakcijski'];
 $nextInvoiceNumber = 1;
 $defaultInvoiceDate = date('Y-m-d');
 $defaultDueDate = date('Y-m-d', strtotime('+15 days'));
@@ -35,10 +35,10 @@ if (!empty($bunitId)) {
     if (!$bunitOptionsQuery->getError() && $bunitOptionsQuery->getResults()) {
         $bunitOptions = Helper::toArray($bunitOptionsQuery->getFirst());
         if (!empty($bunitOptions['card_payment'])) {
-            $invoicePayments['card_payment'] = 'Card payment';
+            $invoicePayments['card_payment'] = 'Kartica';
         }
         if (!empty($bunitOptions['transactional_payment'])) {
-            $invoicePayments['transactional_payment'] = 'Transactional payment';
+            $invoicePayments['transactional_payment'] = 'Transakcijski';
         }
     }
 }
@@ -151,15 +151,14 @@ require '../includes/header.php';
     <style>
         .invoice-page{width:100%;padding:0}.invoice-editor{background:#eef4fb;border-top:1px solid #c9d8ea;border-bottom:1px solid #c9d8ea}.invoice-bar{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.75rem 1rem;background:linear-gradient(180deg,#fbfdff 0%,#e8f0fb 100%);border-bottom:1px solid #c9d8ea}.invoice-bar__group{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.invoice-bar__title{margin:0;color:#0e4f92;font-size:1.2rem;font-weight:700}.invoice-wrap{padding:1rem}.invoice-box{background:#fff;border:1px solid #c8d8ed}.invoice-box__head{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.5rem .75rem;background:#d9e5f3;border-bottom:1px solid #c8d8ed;font-weight:600;color:#243b5f}.invoice-box__body{padding:.75rem}.invoice-customer-grid{display:grid;grid-template-columns:minmax(260px,2fr) minmax(180px,1fr) auto;gap:.75rem;align-items:end}.invoice-details-grid,.invoice-meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}.invoice-field label{display:block;margin-bottom:.22rem;font-size:.78rem;color:#61748e;font-weight:700;text-transform:uppercase;letter-spacing:.03em}.invoice-field--plain label{text-transform:none;letter-spacing:0;font-size:.95rem;font-weight:500;color:#243b5f}.invoice-field input,.invoice-field select,.invoice-note{border-radius:0;border-color:#b9cade;min-height:38px}.invoice-field input[type="date"]{padding-right:.75rem}.invoice-note{min-height:120px;resize:vertical}.invoice-hint{margin:.7rem 0 0;color:#7a8aa0}.invoice-section{margin-top:1rem}.invoice-search{display:grid;grid-template-columns:minmax(280px,1.8fr) auto;gap:.75rem;align-items:end;margin-bottom:.75rem}.invoice-table-wrap{border:1px solid #c8d8ed;background:#fff}.invoice-table{margin-bottom:0;min-width:1040px}.invoice-table thead th{background:#d6d6d6;color:#233856;border-bottom:1px solid #bcc9d9;white-space:nowrap}.invoice-table .form-control{border-radius:0;min-height:34px}.invoice-article-label{font-weight:600;color:#1d3659}.invoice-actions,.invoice-totals{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}.invoice-summary{margin-left:auto;min-width:320px;background:#fff;border:1px solid #c8d8ed;padding:.75rem 1rem}.invoice-summary__row{display:flex;justify-content:space-between;gap:1rem;padding:.25rem 0;color:#243b5f}.invoice-summary__row--strong{font-size:1.1rem;font-weight:700}.invoice-control{background:#fff;border:1px solid #c8d8ed;padding:.75rem 1rem;min-width:250px}@media (max-width:1199px){.invoice-customer-grid,.invoice-details-grid,.invoice-meta-grid,.invoice-search{grid-template-columns:1fr}}
     </style>
-    <form id="newInvoiceForm" data-invoice-form data-endpoint="../api/create-invoice.php" data-update-endpoint="../api/update-invoice.php" class="invoice-editor">
+    <form id="newInvoiceForm" data-invoice-form data-endpoint="../api/create-invoice.php" data-update-endpoint="../api/update-invoice.php" class="invoice-editor" novalidate>
         <div class="invoice-bar">
             <div class="invoice-bar__group">
-                <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Back</a>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Customer Details</button>
-                <button class="btn btn-outline-primary btn-sm d-none" type="button" aria-hidden="true" tabindex="-1">Spremi izmjene</button>
+                <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Natrag</a>
+
                 <button class="btn btn-outline-primary btn-sm d-none" type="button" id="saveInvoiceChangesButton">Spremi izmjene</button>
             </div>
-            <h1 class="invoice-bar__title">Invoice No. <span data-invoice-number-label><?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?></span> - Draft</h1>
+            <h1 class="invoice-bar__title">Račun br. <span data-invoice-number-label><?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?></span> - Koncept</h1>
             <div class="invoice-bar__group">
                 <button class="btn btn-primary btn-sm" type="submit">Izdaj račun</button>
             </div>
@@ -167,14 +166,14 @@ require '../includes/header.php';
         <div class="invoice-wrap">
             <div class="alert d-none mb-3" id="invoiceFormMessage" role="alert"></div>
             <div class="row g-3">
-                <div class="col-xl-6">
+                <div class="col-12 col-md-6 col-xl-6">
                     <section class="invoice-box h-100">
-                        <div class="invoice-box__head"><span>Kupac</span><button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Edit</button></div>
+                        <div class="invoice-box__head"><span>Kupac</span><button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#invoiceCustomerDetails" aria-expanded="false" aria-controls="invoiceCustomerDetails">Detalji</button></div>
                         <div class="invoice-box__body">
                             <div class="invoice-customer-grid">
                                 <div class="invoice-field invoice-field--plain">
                                     <label for="invoice-customer-full-name">Puno ime</label>
-                                    <input class="form-control" type="text" id="invoice-customer-full-name" name="customer_full_name" list="invoice-customer-names" autocomplete="off" placeholder="Upišite ili odaberite kupca..." value="<?php echo htmlspecialchars((string)($prefillCustomer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
+                                    <input class="form-control" type="text" id="invoice-customer-full-name" name="customer_full_name" list="invoice-customer-names" autocomplete="off" placeholder="Upišite ili odaberite kupca..." value="<?php echo htmlspecialchars((string)($prefillCustomer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                     <datalist id="invoice-customer-names"><?php foreach ($customers as $customer) { ?><option value="<?php echo htmlspecialchars((string)($customer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"></option><?php } ?></datalist>
                                 </div>
                                 <div class="invoice-field invoice-field--plain">
@@ -196,20 +195,20 @@ require '../includes/header.php';
                         </div>
                     </section>
                 </div>
-                <div class="col-xl-6">
+                <div class="col-12 col-md-6 col-xl-6">
                     <section class="invoice-box h-100">
                         <div class="invoice-box__head"><span>Zagreb, datum <span data-invoice-date-heading><?php echo htmlspecialchars(date('d.m.Y', strtotime($defaultInvoiceDate)), ENT_QUOTES, 'UTF-8'); ?></span></span><span><span data-invoice-customer-type-code>F2</span> R1</span></div>
                         <div class="invoice-box__body">
                             <div class="invoice-meta-grid">
                                 <div class="invoice-field"><label for="invoice-number-preview">Broj računa</label><input class="form-control" type="text" id="invoice-number-preview" value="<?php echo htmlspecialchars((string)$nextInvoiceNumber, ENT_QUOTES, 'UTF-8'); ?>" readonly></div>
-                                <div class="invoice-field"><label for="invoice-payment">Plaćanje</label><select class="form-select" id="invoice-payment" name="payment" required><?php foreach ($invoicePayments as $paymentValue => $paymentLabel) { ?><option value="<?php echo htmlspecialchars($paymentValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedInvoicePayment === $paymentValue ? 'selected' : ''; ?>><?php echo htmlspecialchars($paymentLabel, ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
-                                <div class="invoice-field"><label for="invoice-date">Datum računa</label><input class="form-control" type="date" id="invoice-date" name="invoice_date" value="<?php echo htmlspecialchars($prefillInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                                <div class="invoice-field"><label for="invoice-due-date">Datum dospijeća</label><input class="form-control" type="date" id="invoice-due-date" name="due_date" value="<?php echo htmlspecialchars($prefillDueDate, ENT_QUOTES, 'UTF-8'); ?>" required></div>
+                                <div class="invoice-field"><label for="invoice-payment">Plaćanje</label><select class="form-select" id="invoice-payment" name="payment"><?php foreach ($invoicePayments as $paymentValue => $paymentLabel) { ?><option value="<?php echo htmlspecialchars($paymentValue, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedInvoicePayment === $paymentValue ? 'selected' : ''; ?>><?php echo htmlspecialchars($paymentLabel, ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
+                                <div class="invoice-field"><label for="invoice-date">Datum računa</label><input class="form-control" type="date" id="invoice-date" name="invoice_date" value="<?php echo htmlspecialchars($prefillInvoiceDate, ENT_QUOTES, 'UTF-8'); ?>"></div>
+                                <div class="invoice-field"><label for="invoice-due-date">Datum dospijeća</label><input class="form-control" type="date" id="invoice-due-date" name="due_date" value="<?php echo htmlspecialchars($prefillDueDate, ENT_QUOTES, 'UTF-8'); ?>"></div>
                             </div>
                             <div class="mt-3 text-body-secondary">
                                 <div><strong>Dospijeće:</strong> <span data-invoice-due-date-label><?php echo htmlspecialchars(date('d.m.Y', strtotime($prefillDueDate)), ENT_QUOTES, 'UTF-8'); ?></span></div>
-                                <div><strong>Business unit:</strong> <?php echo htmlspecialchars((string)($bunit['name'] ?? $bunit['label'] ?? 'Default unit'), ENT_QUOTES, 'UTF-8'); ?></div>
-                                <div><strong>Invoice type:</strong> Maloprodajni račun - cijene bez PDV-a</div>
+                                <div><strong>Poslovna jedinica:</strong> <?php echo htmlspecialchars((string)($bunit['name'] ?? $bunit['label'] ?? 'Default unit'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                <div><strong>Tip računa:</strong> Maloprodajni račun - cijene bez PDV-a</div>
                                 <div><strong>Jezik:</strong> HR</div>
                             </div>
                         </div>
@@ -258,7 +257,7 @@ require '../includes/header.php';
                         </div>
                     </div>
                     <div class="mt-3">
-                        <div class="invoice-field"><label for="invoice-ending-note">Završni tekst</label><textarea class="form-control invoice-note" id="invoice-ending-note" rows="4" placeholder="Optional footer text for the invoice..."><?php echo htmlspecialchars($prefillRemark, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
+                        <div class="invoice-field"><label for="invoice-ending-note">Završni tekst</label><textarea class="form-control invoice-note" id="invoice-ending-note" rows="4"><?php echo htmlspecialchars($prefillRemark, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
                     </div>
                 </div>
             </section>
@@ -271,6 +270,7 @@ require '../includes/header.php';
 <script id="invoicePrefillData" type="application/json"><?php echo $invoicePrefillJson; ?></script>
 <?php require '../includes/footer.php'; ?>
 <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/main1.js?v=10"></script>
+<script src="../assets/js/main1.js?v=11"></script>
 </body>
 </html>
+

@@ -8,12 +8,10 @@ use Exception;
 
 class Fiskalizacija {
     public $certificate;
-    private $uuid;
     private $security;
     private $url = "https://cis.porezna-uprava.hr:8449/FiskalizacijaService";
     private $publicCertificateData;
     private $privateKeyResource;
-    private $signedInfoSignature;
 
     public function __construct($path, $pass, $security = 'SSL', $demo) {
         if ($demo == true) {
@@ -144,14 +142,14 @@ class Fiskalizacija {
         $publicCertificatePureString = str_replace('-----BEGIN CERTIFICATE-----', '', $this->certificate['cert']);
         $publicCertificatePureString = str_replace('-----END CERTIFICATE-----', '', $publicCertificatePureString);
 
-        $this->signedInfoSignature = null;
+        $signedInfoSignature = null;
 
-        if (!openssl_sign($SignedInfoNode->C14N(true), $this->signedInfoSignature, $this->privateKeyResource, OPENSSL_ALGO_SHA1)) {
+        if (!openssl_sign($SignedInfoNode->C14N(true), $signedInfoSignature, $this->privateKeyResource, OPENSSL_ALGO_SHA1)) {
             throw new Exception('Unable to sign the request');
         }
 
         $SignatureNode = $XMLRequestDOMDoc->getElementsByTagName('Signature')->item(0);
-        $SignatureValueNode = new DOMElement('SignatureValue', base64_encode($this->signedInfoSignature));
+        $SignatureValueNode = new DOMElement('SignatureValue', base64_encode($signedInfoSignature));
         $SignatureNode->appendChild($SignatureValueNode);
 
         $KeyInfoNode = $SignatureNode->appendChild(new DOMElement('KeyInfo'));
@@ -167,26 +165,6 @@ class Fiskalizacija {
 
         $X509SerialNumberNode = new DOMElement('X509SerialNumber', $X509IssuerSerial);
         $X509IssuerSerialNode->appendChild($X509SerialNumberNode);
-
-        $envelope = new DOMDocument();
-
-        $envelope->loadXML('<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-		    <soapenv:Body></soapenv:Body>
-		</soapenv:Envelope>');
-
-        $envelope->encoding = 'UTF-8';
-        $envelope->version = '1.0';
-        $XMLRequestType = $XMLRequestDOMDoc->documentElement->localName;
-        $XMLRequestTypeNode = $XMLRequestDOMDoc->getElementsByTagName($XMLRequestType)->item(0);
-        $XMLRequestTypeNode = $envelope->importNode($XMLRequestTypeNode, true);
-
-        $envelope->getElementsByTagName('Body')->item(0)->appendChild($XMLRequestTypeNode);
-        return $envelope->saveXML();
-    }
-
-    public function plainXML($XMLRequest) {
-        $XMLRequestDOMDoc = new DOMDocument();
-        $XMLRequestDOMDoc->loadXML($XMLRequest);
 
         $envelope = new DOMDocument();
 
@@ -245,66 +223,6 @@ class Fiskalizacija {
 
         // 🔥 VRATI RAW XML (bez parseResponse!)
         return $response;
-    }
-
-    public function sendSoapOld($payload) {
-        $ch = curl_init();
-
-        $options = array(
-            CURLOPT_URL => $this->url,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_SSL_VERIFYPEER => false,
-            //CURLOPT_CAINFO => './tests/democacert.cer.pem',
-        );
-
-        switch ($this->security) {
-            case 'SSL':
-                break;
-            case 'TLS':
-//                curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'TLSv1');
-                curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
-                break;
-            default:
-                throw new \InvalidArgumentException(
-                    'Treći parametar konstruktora klase Fiskalizacija mora biti SSL ili TLS!'
-                );
-        }
-
-        curl_setopt_array($ch, $options);
-
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $response = curl_exec($ch);
-
-        if ($response) {
-            curl_close($ch);
-            return $this->parseResponse($response, $code);
-        } else {
-            throw new Exception(curl_error($ch));
-            curl_close($ch);
-        }
-    }
-
-    public function parseResponse($response, $code = 4) {
-        $DOMResponse = new DOMDocument();
-        $DOMResponse->loadXML($response);
-
-        if ($code === 200 || $code == 0) {
-            return $response;
-        } else {
-            $SifraGreske = $DOMResponse->getElementsByTagName('SifraGreske')->item(0);
-            $PorukaGreske = $DOMResponse->getElementsByTagName('PorukaGreske')->item(0);
-
-            if ($SifraGreske && $PorukaGreske) {
-                throw new Exception(sprintf('%s: %s', $SifraGreske->nodeValue, $PorukaGreske->nodeValue));
-            } else {
-                throw new Exception(print_r($response, true), $code);
-            }
-        }
     }
 
     private function getOpenSslErrorMessage($fallbackMessage) {

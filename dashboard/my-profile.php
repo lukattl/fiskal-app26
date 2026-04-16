@@ -20,11 +20,11 @@ function profileLabel($field) {
 
 function profileValue($value) {
     if ($value === null || $value === '') {
-        return 'Not available';
+        return 'Nedostupno';
     }
 
     if (is_bool($value)) {
-        return $value ? 'Yes' : 'No';
+        return $value ? 'Da' : 'Ne';
     }
 
     if (is_scalar($value)) {
@@ -40,7 +40,7 @@ function isCheckedValue($value) {
 
 function formatProfileDate($value) {
     if ($value === null || $value === '') {
-        return 'Not available';
+        return 'Nedostupno';
     }
 
     $timestamp = strtotime((string)$value);
@@ -50,6 +50,46 @@ function formatProfileDate($value) {
 
     return date('d.m.Y', $timestamp);
 }
+
+$userColumnOne = array_filter([
+    'Ime i prezime' => $user['full_name'] ?? '',
+    'Alias' => $user['alias'] ?? '',
+    'Korisničko ime' => $user['username'] ?? '',
+], static function ($value) {
+    return $value !== null && $value !== '';
+});
+
+$userColumnTwo = array_filter([
+    'OIB' => $user['oib'] ?? '',
+    'Email' => $user['email'] ?? '',
+    'Uloga' => $user['role'] ?? '',
+], static function ($value) {
+    return $value !== null && $value !== '';
+});
+
+$companyAddressParts = array_filter([
+    $company['address'] ?? '',
+    $company['city'] ?? '',
+    $company['postal_code'] ?? '',
+], static function ($value) {
+    return $value !== null && trim((string)$value) !== '';
+});
+
+$companyColumnOne = array_filter([
+    'Naziv' => $company['full_name'] ?? $company['short_name'] ?? '',
+    'Adresa' => !empty($companyAddressParts) ? implode(', ', $companyAddressParts) : '',
+], static function ($value) {
+    return $value !== null && $value !== '';
+});
+
+$companyColumnTwo = array_filter([
+    'OIB' => $company['oib'] ?? '',
+    'PDV' => array_key_exists('pdv', $company) ? ((int)$company['pdv'] === 1 ? 'Da' : 'Ne') : '',
+    'IBAN' => $company['iban'] ?? '',
+    'P12 lozinka' => $company['p12_password'] ?? '',
+], static function ($value) {
+    return $value !== null && $value !== '';
+});
 ?>
 <?php require '../includes/header.php'; ?>
 
@@ -64,12 +104,24 @@ function formatProfileDate($value) {
                 <h2 class="h5 mb-0">Podaci o korisniku</h2>
                 <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editUserModal">Uredi korisnika</button>
             </div>
-            <dl class="row mb-0">
-                <?php foreach ($userFields as $field => $value) { ?>
-                    <dt class="col-sm-3"><?php echo htmlspecialchars(profileLabel($field), ENT_QUOTES, 'UTF-8'); ?></dt>
-                    <dd class="col-sm-9"><?php echo htmlspecialchars($field === 'created_at' ? formatProfileDate($value) : profileValue($value), ENT_QUOTES, 'UTF-8'); ?></dd>
-                <?php } ?>
-            </dl>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row mb-0">
+                        <?php foreach ($userColumnOne as $field => $value) { ?>
+                            <dt class="col-sm-4"><?php echo htmlspecialchars(profileLabel($field), ENT_QUOTES, 'UTF-8'); ?></dt>
+                            <dd class="col-sm-8"><?php echo htmlspecialchars(profileValue($value), ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <?php } ?>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row mb-0">
+                        <?php foreach ($userColumnTwo as $field => $value) { ?>
+                            <dt class="col-sm-4"><?php echo htmlspecialchars(profileLabel($field), ENT_QUOTES, 'UTF-8'); ?></dt>
+                            <dd class="col-sm-8"><?php echo htmlspecialchars(profileValue($value), ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <?php } ?>
+                    </dl>
+                </div>
+            </div>
         </div>
 
         <div class="card p-4 mt-3">
@@ -78,12 +130,24 @@ function formatProfileDate($value) {
                 <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editCompanyModal">Uredi tvrtku</button>
             </div>
             <?php if (!empty($companyFields)) { ?>
-                <dl class="row mb-0">
-                    <?php foreach ($companyFields as $field => $value) { ?>
-                        <dt class="col-sm-3"><?php echo htmlspecialchars(profileLabel($field), ENT_QUOTES, 'UTF-8'); ?></dt>
-                        <dd class="col-sm-9"><?php echo htmlspecialchars($field === 'created_at' ? formatProfileDate($value) : profileValue($field === 'pdv' ? ((int)$value === 1 ? 'On' : 'Off') : $value), ENT_QUOTES, 'UTF-8'); ?></dd>
-                    <?php } ?>
-                </dl>
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row mb-0">
+                            <?php foreach ($companyColumnOne as $field => $value) { ?>
+                                <dt class="col-sm-4"><?php echo htmlspecialchars(profileLabel($field), ENT_QUOTES, 'UTF-8'); ?></dt>
+                                <dd class="col-sm-8"><?php echo htmlspecialchars(profileValue($value), ENT_QUOTES, 'UTF-8'); ?></dd>
+                            <?php } ?>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row mb-0">
+                            <?php foreach ($companyColumnTwo as $field => $value) { ?>
+                                <dt class="col-sm-4"><?php echo htmlspecialchars(profileLabel($field), ENT_QUOTES, 'UTF-8'); ?></dt>
+                                <dd class="col-sm-8"><?php echo htmlspecialchars(profileValue($value), ENT_QUOTES, 'UTF-8'); ?></dd>
+                            <?php } ?>
+                        </dl>
+                    </div>
+                </div>
             <?php } else { ?>
                 <p class="text-muted mb-0">Nisu pronađeni podaci o tvrtci za ovog korisnika.</p>
             <?php } ?>

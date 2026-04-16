@@ -61,13 +61,6 @@ try {
 
     $db = DB::getInstance();
     $conn = $db->getConn();
-    $invoiceColumnsStmt = $conn->query('SHOW COLUMNS FROM invoices');
-    $invoiceColumns = [];
-    while ($invoiceColumn = $invoiceColumnsStmt->fetch(PDO::FETCH_ASSOC)) {
-        $invoiceColumns[] = (string)($invoiceColumn['Field'] ?? '');
-    }
-    $supportsCustomerId = in_array('customer_id', $invoiceColumns, true);
-    $supportsBunitId = in_array('bunit_id', $invoiceColumns, true);
 
     $bunitQuery = $db->query('SELECT * FROM business_units WHERE id = ?', [$bunitId], 1);
     if ($bunitQuery->getError() || !$bunitQuery->getResults()) {
@@ -133,14 +126,6 @@ try {
     }
 
     $customerFullName = trim((string)($customerPayload['full_name'] ?? ''));
-    if ($customerFullName === '') {
-        http_response_code(400);
-        echo json_encode([
-            "success" => false,
-            "message" => "Kupac je obavezan."
-        ]);
-        exit;
-    }
 
     $customerData = [
         'full_name' => $customerFullName,
@@ -271,109 +256,76 @@ try {
     $conn->beginTransaction();
 
     $customerId = null;
-    if ($customerData['oib'] !== '') {
-        $existingCustomerStmt = $conn->prepare('SELECT id FROM customers WHERE company_id = ? AND oib = ? LIMIT 1');
-        $existingCustomerStmt->execute([$company['id'], $customerData['oib']]);
-    } else {
-        $existingCustomerStmt = $conn->prepare('SELECT id FROM customers WHERE company_id = ? AND full_name = ? LIMIT 1');
-        $existingCustomerStmt->execute([$company['id'], $customerData['full_name']]);
-    }
-    $existingCustomer = $existingCustomerStmt->fetch(PDO::FETCH_ASSOC);
+    if ($customerData['full_name'] !== '' || $customerData['oib'] !== '') {
+        if ($customerData['oib'] !== '') {
+            $existingCustomerStmt = $conn->prepare('SELECT id FROM customers WHERE company_id = ? AND oib = ? LIMIT 1');
+            $existingCustomerStmt->execute([$company['id'], $customerData['oib']]);
+        } else {
+            $existingCustomerStmt = $conn->prepare('SELECT id FROM customers WHERE company_id = ? AND full_name = ? LIMIT 1');
+            $existingCustomerStmt->execute([$company['id'], $customerData['full_name']]);
+        }
+        $existingCustomer = $existingCustomerStmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($existingCustomer) {
-        $customerId = (int)$existingCustomer['id'];
-        $customerUpdateStmt = $conn->prepare('UPDATE customers SET full_name = ?, legal = ?, address = ?, city = ?, country = ?, oib = ?, email = ? WHERE id = ?');
-        $customerUpdateStmt->execute([
-            $customerData['full_name'],
-            $customerData['legal'],
-            $customerData['address'],
-            $customerData['city'],
-            $customerData['country'],
-            $customerData['oib'],
-            $customerData['email'],
-            $customerId,
-        ]);
-    } else {
-        $customerInsertStmt = $conn->prepare('INSERT INTO customers (full_name, legal, address, city, country, oib, email, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-        $customerInsertStmt->execute([
-            $customerData['full_name'],
-            $customerData['legal'],
-            $customerData['address'],
-            $customerData['city'],
-            $customerData['country'],
-            $customerData['oib'],
-            $customerData['email'],
-            $company['id'],
-        ]);
-        $customerId = (int)$conn->lastInsertId();
-    }
-
-    $invoiceInsertColumns = ['number', 'company_id', 'user_id', 'payment', 'insert_time'];
-    $invoiceValues = [$invoiceNumber, $company['id'], $user['id'], $invoicePaymentValue, $insertTime];
-    if (in_array('netto_price', $invoiceColumns, true)) {
-        $invoiceInsertColumns[] = 'netto_price';
-        $invoiceValues[] = number_format($invoiceNettoPrice, 2, '.', '');
-    }
-    if (in_array('vat_amount', $invoiceColumns, true)) {
-        $invoiceInsertColumns[] = 'vat_amount';
-        $invoiceValues[] = number_format($invoiceVatAmount, 2, '.', '');
-    }
-    if (in_array('total_price', $invoiceColumns, true)) {
-        $invoiceInsertColumns[] = 'total_price';
-        $invoiceValues[] = number_format($invoiceTotalPrice, 2, '.', '');
-    }
-    if (in_array('remark', $invoiceColumns, true)) {
-        $invoiceInsertColumns[] = 'remark';
-        $invoiceValues[] = $remark;
-    }
-    $invoiceInsertColumns[] = 'due_date';
-    $invoiceValues[] = $dueDate !== '' ? $dueDate : null;
-    if ($supportsCustomerId) {
-        $invoiceInsertColumns[] = 'customer_id';
-        $invoiceValues[] = $customerId;
-    }
-    if ($supportsBunitId) {
-        $invoiceInsertColumns[] = 'bunit_id';
-        $invoiceValues[] = $bunitId;
+        if ($existingCustomer) {
+            $customerId = (int)$existingCustomer['id'];
+            $customerUpdateStmt = $conn->prepare('UPDATE customers SET full_name = ?, legal = ?, address = ?, city = ?, country = ?, oib = ?, email = ? WHERE id = ?');
+            $customerUpdateStmt->execute([
+                $customerData['full_name'],
+                $customerData['legal'],
+                $customerData['address'],
+                $customerData['city'],
+                $customerData['country'],
+                $customerData['oib'],
+                $customerData['email'],
+                $customerId,
+            ]);
+        } else {
+            $customerInsertStmt = $conn->prepare('INSERT INTO customers (full_name, legal, address, city, country, oib, email, company_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $customerInsertStmt->execute([
+                $customerData['full_name'],
+                $customerData['legal'],
+                $customerData['address'],
+                $customerData['city'],
+                $customerData['country'],
+                $customerData['oib'],
+                $customerData['email'],
+                $company['id'],
+            ]);
+            $customerId = (int)$conn->lastInsertId();
+        }
     }
 
-    $invoiceSql = sprintf(
-        'INSERT INTO invoices (%s) VALUES (%s)',
-        implode(', ', $invoiceInsertColumns),
-        implode(', ', array_fill(0, count($invoiceInsertColumns), '?'))
-    );
-    $invoiceStmt = $conn->prepare($invoiceSql);
-    $invoiceStmt->execute($invoiceValues);
+    $invoiceStmt = $conn->prepare('
+        INSERT INTO invoices (
+            number,
+            company_id,
+            user_id,
+            customer_id,
+            bunit_id,
+            payment,
+            insert_time,
+            due_date,
+            netto_price,
+            vat_amount,
+            total_price,
+            remark
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ');
+    $invoiceStmt->execute([
+        $invoiceNumber,
+        $company['id'],
+        $user['id'],
+        $customerId,
+        $bunitId,
+        $invoicePaymentValue,
+        $insertTime,
+        $dueDate !== '' ? $dueDate : null,
+        number_format($invoiceNettoPrice, 2, '.', ''),
+        number_format($invoiceVatAmount, 2, '.', ''),
+        number_format($invoiceTotalPrice, 2, '.', ''),
+        $remark,
+    ]);
     $invoiceId = (int)$conn->lastInsertId();
-
-    if ($supportsCustomerId && $customerId > 0) {
-        $invoiceCustomerStmt = $conn->prepare('UPDATE invoices SET customer_id = ? WHERE id = ? AND company_id = ?');
-        $invoiceCustomerStmt->execute([$customerId, $invoiceId, $company['id']]);
-    }
-    if (in_array('netto_price', $invoiceColumns, true) || in_array('vat_amount', $invoiceColumns, true) || in_array('total_price', $invoiceColumns, true) || in_array('remark', $invoiceColumns, true)) {
-        $totalFields = [];
-        $totalValues = [];
-        if (in_array('netto_price', $invoiceColumns, true)) {
-            $totalFields[] = 'netto_price = ?';
-            $totalValues[] = number_format($invoiceNettoPrice, 2, '.', '');
-        }
-        if (in_array('vat_amount', $invoiceColumns, true)) {
-            $totalFields[] = 'vat_amount = ?';
-            $totalValues[] = number_format($invoiceVatAmount, 2, '.', '');
-        }
-        if (in_array('total_price', $invoiceColumns, true)) {
-            $totalFields[] = 'total_price = ?';
-            $totalValues[] = number_format($invoiceTotalPrice, 2, '.', '');
-        }
-        if (in_array('remark', $invoiceColumns, true)) {
-            $totalFields[] = 'remark = ?';
-            $totalValues[] = $remark;
-        }
-        $totalValues[] = $invoiceId;
-        $totalValues[] = $company['id'];
-        $invoiceTotalsStmt = $conn->prepare('UPDATE invoices SET ' . implode(', ', $totalFields) . ' WHERE id = ? AND company_id = ?');
-        $invoiceTotalsStmt->execute($totalValues);
-    }
 
     $invoiceArticlesStmt = $conn->prepare('INSERT INTO invoice_articles (label, amount, retail_price, final_price, vat_rate, unit, discount, tip_price, invoice_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
     foreach ($preparedArticles as $preparedArticle) {

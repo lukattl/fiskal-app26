@@ -8,8 +8,6 @@ class DB
 	private $query;
 	private $error = false;
 	private $results;
-	private $records = 0;
-	private $lastInsert = 0;
 	
 	private function __construct()
 	{
@@ -72,7 +70,6 @@ class DB
 			
 			if($this->query->execute()){
 			$this->results = $this->query->fetchAll($this->config['fetch']);
-			$this->records = $this->query->rowCount();
 			} else {
 				$this->error = true;
 			}
@@ -80,83 +77,6 @@ class DB
 		
 		
 		return $this;
-	}
-	
-		/**
-	* Run database querie.
-	*
-	* @param string $action
-	* @param string $table
-	* @param array $where
-	* @return DB object
-	*/
-	public function action($action, $table, $where = array(), $limit = '')
-	{
-		if(count($where) === 3){
-			$operators = array('=', '<', '>', '<=', '>=', '<>');
-			
-			$field 		= $where[0];
-			$operator 	= $where[1];
-			$value 		= $where[2];
-
-			if ($limit != '') {
-				$limit = " limit $limit";
-			}
-			
-			if(in_array($operator, $operators)){
-				$sql = "{$action} FROM {$table} WHERE {$field} {$operator} ? {$limit}";
-				
-				if(!$this->query($sql, array($value))->error){
-					return $this;
-				}
-			}
-			
-			return $this;
-		} else {
-			$sql = "{$action} FROM {$table}";
-			if(!$this->query($sql)->error){
-				return $this;
-			}
-		}
-		
-		return false;
-	}
-	
-	/**
-	* Run SELECT query.
-	*
-	* @param string $fields
-	* @param string $table
-	* @param array $where
-	* @return DB object
-	*/
-	public function get($fields, $table, $where = array(), $limit = '')
-	{
-		return $this->action("SELECT {$fields}", $table, $where, $limit);
-	}
-	
-	/**
-	*Select all data by ID.
-	*
-	* @param int $id
-	* @param string $table
-	* @return DB object
-	*/
-	public function find($id, $table)
-	{
-		return $this->action("SELECT *", $table, array('id', '=', '$id'));
-	}
-	
-	/**
-	* Run DELETE .
-	*
-	* @param string $table
-	* @param array $where
-	* @return DB object
-	*/
-	public function destroy($table, $where)
-	{
-		return $this->action("DELETE", $table, $where);
 	}
 	
 	/**
@@ -168,7 +88,6 @@ class DB
 	*/
 	public function insert($table, $fields)
 	{
-		$this->lastInsert = 0;
 		$fields_name = implode(',', array_keys($fields));
 		$values = '';
 		$x = 1;
@@ -185,7 +104,6 @@ class DB
 		$sql = "INSERT INTO {$table} ({$fields_name}) VALUES ({$values})";
 		
 		if(!$this->query($sql, $fields)->error) {
-			$this->lastInsert = $this->conn->lastInsertId();
 			return $this->conn->lastInsertId();
 		}
 
@@ -193,55 +111,6 @@ class DB
 		return false;
 	}
 	
-	public function insertWithoutId($table, $fields)
-	{
-		$fields_name = implode(',', array_keys($fields));
-		$values = '';
-		$x = 1;
-		$el_num = count($fields);
-		
-		foreach($fields as $field){
-			$values .= '?';
-			if($x < $el_num){
-				$values .= ',';
-			}
-			$x++;
-		}
-		
-		$sql = "INSERT INTO {$table} ({$fields_name}) VALUES ({$values})";
-		
-		if(!$this->query($sql, $fields)->error) {
-			return true;
-		}
-		return false;
-	}
-
-	public function insertTest($table, $fields)
-	{
-		$this->lastInsert = 0;
-		$fields_name = implode(',', array_keys($fields));
-		$values = '';
-		$x = 1;
-		$el_num = count($fields);
-		
-		foreach($fields as $field){
-			$values .= '?';
-			if($x < $el_num){
-				$values .= ',';
-			}
-			$x++;
-		}
-		
-		$sql = "INSERT INTO {$table} ({$fields_name}) VALUES ({$values})";
-		
-		if(!$this->query($sql, $fields)->error) {
-			$this->lastInsert = $this->conn->lastInsertId();
-			return $this;
-		}
-
-		
-		return $this;
-	}
 	/**
 	* Run UPDATE.
 	*
@@ -280,36 +149,6 @@ class DB
 		return false;
 	}
 	
-	public function updateTest($table, $fields, $where = array())
-	{
-		$set = '';
-		$x = 1;
-		$el_num = count($fields);
-		
-		foreach($fields as $field => $value){
-			$set .= "{$field} = ?";
-			if($x < $el_num){
-				$set .= ',';
-			}
-			$x++;
-		}
-		
-		$sql = "UPDATE {$table} SET {$set}";
-		
-		if(!empty($where)){
-			$field = array_keys($where)[0];
-			$value = $where[$field];
-			$sql .= " WHERE {$field} = ?";
-			
-			$fields = array_merge($fields, (array)$value);
-		}
-		
-		if(!$this->query($sql, $fields)->error){
-			return $this;
-		}
-		return $this;
-	}
-	
 	/*###### GETERS #############*/
 	/**
 	* RETURN $conn
@@ -339,22 +178,9 @@ class DB
 		return $this->results[0];
 	}
 	
-	/**
-	* Return number of records
-	* 
-	* @return $records
-	*/
-	public function getRecords()
-	{
-		return $this->records;
-	}
 	public function getError()
 	{
 		return $this->error;
-	}
-	public function getLastId()
-	{
-		return $this->lastInsert;
 	}
 }
 

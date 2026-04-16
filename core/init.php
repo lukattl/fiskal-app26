@@ -5,6 +5,7 @@ if (!isset($_SESSION)) {
 
 ini_set('display_errors', 1);
 
+// Logging Die&Dump
 function dd($data = 'ok', $data1 = ''){
 	echo '<pre>';
 	var_dump($data);
@@ -13,12 +14,9 @@ function dd($data = 'ok', $data1 = ''){
 	die();
 }
 
-
-$F2root = dirname(dirname(__FILE__));
-#require_once("{$F2root}/functions/sanitize.php");
-#require_once("{$F2root}/functions/debug.php");
+$Froot = dirname(dirname(__FILE__));
 
 spl_autoload_register(function ($class){
-	$F2root = dirname(dirname(__FILE__));
-	require_once("{$F2root}/classes/{$class}.php");
+	$Froot = dirname(dirname(__FILE__));
+	require_once("{$Froot}/classes/{$class}.php");
 });

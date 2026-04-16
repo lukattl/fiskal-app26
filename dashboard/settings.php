@@ -37,7 +37,7 @@ if (!empty($company['id'])) {
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1 class="h4 mb-0">Postavke</h1>
-            <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Back to Dashboard</a>
+            <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Natrag na ploču</a>
         </div>
 
         <div class="card p-4">
@@ -102,7 +102,7 @@ if (!empty($company['id'])) {
                                 <th>Maloprodajna cijena</th>
                                 <th>Stopa PDV-a</th>
                                 <th>Jedinica</th>
-                                <th class="text-end">Action</th>
+                                <th class="text-end"></th>
                             </tr>
                         </thead>
                         <tbody>

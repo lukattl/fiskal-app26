@@ -3,7 +3,7 @@
         <div class="modal-content">
             <form data-json-form data-endpoint="../api/update-user.php" data-success-message="User data updated successfully.">
                 <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="editUserModalLabel">Edit User Data</h2>
+                    <h2 class="modal-title fs-5" id="editUserModalLabel">Uređivanje podataka korisnika</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -39,8 +39,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save User</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Odustani</button>
+                    <button type="submit" class="btn btn-primary">Spremi</button>
                 </div>
             </form>
         </div>

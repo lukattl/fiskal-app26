@@ -19,24 +19,24 @@ if (!$customersQuery->getError() && $customersQuery->getResults()) {
 
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h4 mb-0">Customers</h1>
-            <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Back to Dashboard</a>
+            <h1 class="h4 mb-0">Kupci</h1>
+            <a class="btn btn-outline-primary btn-sm" href="dashboard.php">Natrag</a>
         </div>
 
         <div class="card p-4">
             <div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
-                <h2 class="h5 mb-0">Customer List</h2>
+                <h2 class="h5 mb-0">Popis kupaca</h2>
                 <div class="d-flex gap-2 flex-wrap">
                     <input
                         class="form-control"
                         type="search"
-                        placeholder="Search customers..."
+                        placeholder="Pretraži kupce"
                         data-search-input
                         data-search-target="#customersTableBody"
                         style="max-width: 320px;"
                     >
                     <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newCustomerModal">
-                        New Customer
+                        Novi kupac
                     </button>
                 </div>
             </div>
@@ -46,13 +46,13 @@ if (!$customersQuery->getError() && $customersQuery->getResults()) {
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>Full Name</th>
-                                <th>Address</th>
-                                <th>City</th>
-                                <th>Country</th>
+                                <th>Naziv</th>
+                                <th>Adresa</th>
+                                <th>Grad</th>
+                                <th>Država</th>
                                 <th>OIB</th>
                                 <th>Email</th>
-                                <th class="text-end">Action</th>
+                                <th class="text-end"></th>
                             </tr>
                         </thead>
                         <tbody id="customersTableBody">
@@ -71,7 +71,7 @@ if (!$customersQuery->getError() && $customersQuery->getResults()) {
                                             data-bs-toggle="modal"
                                             data-bs-target="#editCustomerModal-<?php echo (int)($customer['id'] ?? 0); ?>"
                                         >
-                                            Edit Customer
+                                            Uredi
                                         </button>
                                     </td>
                                 </tr>
@@ -80,7 +80,7 @@ if (!$customersQuery->getError() && $customersQuery->getResults()) {
                     </table>
                 </div>
             <?php } else { ?>
-                <p class="text-muted mb-0">No customers found.</p>
+                <p class="text-muted mb-0">Nema pronađenih kupaca.</p>
             <?php } ?>
         </div>
     </main>

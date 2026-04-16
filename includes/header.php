@@ -25,13 +25,13 @@ $fullName = $fullName ?? 'User';
                     <?php echo htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8'); ?>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item<?php echo $pageKey === 'profile' ? ' active' : ''; ?>" href="my-profile.php">My Profile</a></li>
-                    <li><a class="dropdown-item<?php echo $pageKey === 'settings' ? ' active' : ''; ?>" href="settings.php">Settings</a></li>
-                    <li><a class="dropdown-item<?php echo $pageKey === 'invoices' ? ' active' : ''; ?>" href="invoices.php">Invoices</a></li>
-                    <li><a class="dropdown-item<?php echo $pageKey === 'customers' ? ' active' : ''; ?>" href="customers.php">Customers</a></li>
-                    <li><a class="dropdown-item<?php echo $pageKey === 'payments' ? ' active' : ''; ?>" href="payments.php">Payments</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><button class="dropdown-item text-danger" type="button" data-logout data-logout-url="../api/logout.php">Logout</button></li>
+                    <li><a class="dropdown-item<?php echo $pageKey === 'invoices' ? ' active' : ''; ?>" href="invoices.php">Računi</a></li>
+                    <li><a class="dropdown-item<?php echo $pageKey === 'customers' ? ' active' : ''; ?>" href="customers.php">Kupci</a></li>
+                    <li><a class="dropdown-item<?php echo $pageKey === 'settings' ? ' active' : ''; ?>" href="settings.php">Postavke</a></li>
+                    <li><a class="dropdown-item<?php echo $pageKey === 'profile' ? ' active' : ''; ?>" href="my-profile.php">Moj profil</a></li>
+<!--                     <li><a class="dropdown-item<?php echo $pageKey === 'payments' ? ' active' : ''; ?>" href="payments.php">Plaćanja</a></li>
+ -->                    <li><hr class="dropdown-divider"></li>
+                    <li><button class="dropdown-item text-danger" type="button" data-logout data-logout-url="../api/logout.php">Odjava</button></li>
                 </ul>
             </div>
         </div>

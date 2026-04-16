@@ -473,14 +473,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return false;
             }
 
-            if (!payload.customer.full_name) {
-                if (invoiceMessage) {
-                    invoiceMessage.className = "alert alert-danger";
-                    invoiceMessage.textContent = "Customer full name is required.";
-                }
-                return false;
-            }
-
             if (payload.customer.oib && !isValidOib(payload.customer.oib)) {
                 if (invoiceMessage) {
                     invoiceMessage.className = "alert alert-danger";
@@ -766,13 +758,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const term = (searchValue || "").trim().toLowerCase();
-            if (!term) {
-                hideArticleSuggestions();
-                return;
-            }
-
             const matches = invoiceArticles
-                .filter((article) => String(article.label || "").toLowerCase().includes(term))
+                .filter((article) => {
+                    if (!term) {
+                        return true;
+                    }
+
+                    return String(article.label || "").toLowerCase().includes(term);
+                })
                 .slice(0, 8);
 
             if (!matches.length) {

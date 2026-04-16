@@ -9,25 +9,15 @@ class Bill {
     public $noteOfOrder = "N";
     public $billNumber;
     public $listPDV;
-    public $listPNP;
-    public $listOtherTaxRate;
     public $taxFreeValuePdv;
-    public $marginForTaxRate;    
-    public $taxFreeValue;
-    public $refund = array();
     public $totalValue;
     public $typeOfPaying;
     public $oibOperative;
     public $securityCode;
     public $noteOfRedelivary = false;    
-    public $noteOfParagonBill;    
-    public $specificPurpose;
-    public $oibPrimateljaRacuna;
     public $idKupca;
     public $oznakaIdKupca;
-    public $operationType = 'create'; // default
-    public $newTypeOfPaying;
-    public $newKupac;
+    public $operationType = 'create';
 
     public function setOib($oib) {
         $this->oib = $oib;
@@ -53,28 +43,8 @@ class Bill {
         $this->listPDV = $listPDV;
     }
 
-    public function setListPNP($listPNP) {
-        $this->listPNP = $listPNP;
-    }
-
-    public function setListOtherTaxRate($listOtherTaxRate) {
-        $this->listOtherTaxRate = $listOtherTaxRate;
-    }
-
     public function setTaxFreeValue($taxFreeValuePdv) {
         $this->taxFreeValuePdv = $taxFreeValuePdv;
-    }
-
-    public function setMarginForTaxRate($marginForTaxRate) {
-        $this->marginForTaxRate = $marginForTaxRate;
-    }
-
-    public function setTaxFree($taxFreeValue) {
-        $this->taxFreeValue = $taxFreeValue;
-    }
-
-    public function setRefund($refund) {
-        $this->refund = $refund;
     }
 
     public function setTotalValue($totalValue) {
@@ -93,22 +63,6 @@ class Bill {
         $this->securityCode = $securityCode;
     }
 
-    public function setNoteOfRedelivary($noteOfRedelivary) {
-        $this->noteOfRedelivary = $noteOfRedelivary;
-    }
-
-    public function setNoteOfParagonBill($noteOfParagonBill) {
-        $this->noteOfParagonBill = $noteOfParagonBill;
-    }
-
-    public function setSpecificPurpose($specificPurpose) {
-        $this->specificPurpose = $specificPurpose;
-    }
-
-    public function setOibPrimateljaRacuna($oibPrimateljaRacuna) {
-        $this->oibPrimateljaRacuna = $oibPrimateljaRacuna;
-    }
-
     public function setIdKupca($idKupca) {
         $this->idKupca = trim($idKupca);
     }
@@ -117,27 +71,15 @@ class Bill {
         $this->oznakaIdKupca = $oznakaIdKupca;
     }
 
-    public function setOperationType($type) {
-        $this->operationType = $type;
-    }
-
-    public function setNewTypeOfPaying($newTypeOfPaying) {
-        $this->newTypeOfPaying = $newTypeOfPaying;
-    }
-
-    public function setNewKupac($newKupac) {
-        $this->newKupac = $newKupac;
-    }
-    
     /**
-     * Generiranje za�titnog koda na temelju ulaznih parametara
+     * Generiranje zaštitnog koda na temelju ulaznih parametara
      * @param  [type] $pkey privatni kljuc iz certifikata
      * @param  [type] $oib  oib
-     * @param  [type] $dt   datum i vrijeme izdavanja ra�una zapisan kao tekst u formatu 'dd.mm.gggg hh:mm:ss'
-     * @param  [type] $bor  broj�ana oznaka ra�una
+     * @param  [type] $dt   datum i vrijeme izdavanja računa zapisan kao tekst u formatu 'dd.mm.gggg hh:mm:ss'
+     * @param  [type] $bor  brojčana oznaka računa
      * @param  [type] $opp  oznaka poslovnog prostora
-     * @param  [type] $onu  oznaka naplatnog ure�aja
-     * @param  [type] $uir  ukupni iznos ra�una
+     * @param  [type] $onu  oznaka naplatnog uređaja
+     * @param  [type] $uir  ukupni iznos računa
      * @return [type]       md5 hash
      */
     public function securityCode($pkey, $oib, $dt, $bor, $opp, $onu, $uir) {
@@ -215,10 +157,6 @@ class Bill {
                 if (!empty($this->taxFreeValue)) {
                     $writer->writeElementNs($ns, 'IznosNePodlOpor', null, number_format($this->taxFreeValue, 2, '.', ''));
                 }
-
-        //        $writer->writeElementNs($ns, 'IznosOslobPdv', null, number_format($this->taxFreeValuePdv, 2, '.', ''));
-        //        $writer->writeElementNs($ns, 'IznosMarza', null, number_format($this->marginForTaxRate, 2, '.', ''));
-        //        $writer->writeElementNs($ns, 'IznosNePodlOpor', null, number_format($this->taxFreeValue, 2, '.', ''));
 
                 /*********** Naknada *************************/
                 if (!empty($this->refund)) {

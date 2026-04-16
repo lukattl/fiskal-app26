@@ -55,7 +55,7 @@ if (!empty($invoices)) {
 function formatInvoiceDateValue($value)
 {
     if (empty($value)) {
-        return 'Not available';
+        return 'Nedostupno';
     }
 
     $timestamp = strtotime((string)$value);
@@ -69,7 +69,7 @@ function formatInvoiceDateValue($value)
 function formatInvoiceDateTimeValue($value)
 {
     if (empty($value)) {
-        return 'Not available';
+        return 'Nedostupno';
     }
 
     $timestamp = strtotime((string)$value);
@@ -141,7 +141,7 @@ function invoiceActionIcon($type)
                                     $fullNumber .= '/' . $invoiceBunitLabel2;
                                 }
                                 $customer = $customersMap[(int)($invoice['customer_id'] ?? 0)] ?? null;
-                                $customerName = is_array($customer) ? (string)($customer['full_name'] ?? 'Not available') : 'Not available';
+                                $customerName = is_array($customer) ? (string)($customer['full_name'] ?? '-') : '-';
                                 $invoiceDate = formatInvoiceDateValue($invoice['insert_time'] ?? '');
                                 $dueDate = formatInvoiceDateValue($invoice['due_date'] ?? '');
                                 $invoiceArticles = $invoiceArticlesMap[(int)($invoice['id'] ?? 0)] ?? [];
@@ -215,18 +215,18 @@ function invoiceActionIcon($type)
                                     <div class="row g-4">
                                         <div class="col-lg-6">
                                             <div class="card p-3 h-100">
-                                                <h3 class="h6 mb-3">Customer</h3>
+                                                <h3 class="h6 mb-3">Kupac</h3>
                                                 <?php if (is_array($customer)) { ?>
                                                     <dl class="row mb-0">
-                                                        <dt class="col-sm-4">Full Name</dt>
+                                                        <dt class="col-sm-4">Naziv</dt>
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['full_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
                                                         <dt class="col-sm-4">OIB</dt>
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['oib'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                        <dt class="col-sm-4">Address</dt>
+                                                        <dt class="col-sm-4">Adresa</dt>
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['address'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                        <dt class="col-sm-4">City</dt>
+                                                        <dt class="col-sm-4">Grad</dt>
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['city'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                        <dt class="col-sm-4">Country</dt>
+                                                        <dt class="col-sm-4">Država</dt>
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['country'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
                                                         <dt class="col-sm-4">Email</dt>
                                                         <dd class="col-sm-8"><?php echo htmlspecialchars((string)($customer['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
@@ -246,27 +246,27 @@ function invoiceActionIcon($type)
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars($dueDate, ENT_QUOTES, 'UTF-8'); ?></dd>
                                                     <dt class="col-sm-5">Plaćanje</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars((string)($invoice['payment'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Osnovica</dt>
-                                                    <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['netto_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Iznos PDV-a</dt>
-                                                    <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['vat_amount'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
-                                                    <dt class="col-sm-5">Konačna cijena</dt>
-                                                    <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['total_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
                                                     <dt class="col-sm-5">Fiskalizacija</dt>
-                                                    <dd class="col-sm-7"><?php echo !empty($invoice['jir']) && !empty($invoice['fiskaled_at']) ? 'Yes' : 'No'; ?></dd>
+                                                    <dd class="col-sm-7"><?php echo !empty($invoice['jir']) && !empty($invoice['fiskaled_at']) ? 'Da' : 'Ne'; ?></dd>
                                                     <dt class="col-sm-5">JIR</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars((string)($invoice['jir'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
                                                     <dt class="col-sm-5">Vrijeme fiskalizacije</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceDateTimeValue($invoice['fiskaled_at'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
                                                     <dt class="col-sm-5">Napomena</dt>
                                                     <dd class="col-sm-7"><?php echo htmlspecialchars((string)($invoice['remark'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></dd>
+                                                    <dt class="col-sm-5">Osnovica</dt>
+                                                    <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['netto_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
+                                                    <dt class="col-sm-5">Iznos PDV-a</dt>
+                                                    <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['vat_amount'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
+                                                    <dt class="col-sm-5">Konačna cijena</dt>
+                                                    <dd class="col-sm-7"><?php echo htmlspecialchars(formatInvoiceMoney($invoice['total_price'] ?? 0) . ' EUR', ENT_QUOTES, 'UTF-8'); ?></dd>
                                                 </dl>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="card p-3 mt-4">
-                                        <h3 class="h6 mb-3">Articles</h3>
+                                        <h3 class="h6 mb-3">Artikli</h3>
                                         <?php if (!empty($invoiceArticles)) { ?>
                                             <div class="table-responsive">
                                                 <table class="table table-sm align-middle mb-0">
